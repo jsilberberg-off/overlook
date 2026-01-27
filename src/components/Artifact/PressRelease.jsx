@@ -1,0 +1,71 @@
+import React from 'react';
+import { ArrowLeft } from 'lucide-react';
+
+export default function PressReleaseArtifact({ data, onClose }) {
+  return (
+    <div className="fixed inset-0 z-50 bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-300">
+      <div className="bg-white max-w-5xl w-full rounded-sm shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[85vh] animate-in slide-in-from-bottom-8 duration-500">
+        
+        {/* Sidebar Stats */}
+        <div className="bg-slate-950 text-white p-8 md:w-80 flex-shrink-0 font-sans relative">
+           <button onClick={onClose} className="absolute top-6 left-6 text-slate-400 hover:text-white flex items-center gap-2 text-xs font-bold uppercase tracking-wider transition-colors">
+             <ArrowLeft className="w-4 h-4"/> Back to Editor
+           </button>
+           
+           <div className="mt-16 text-[10px] font-bold text-teal-400 uppercase tracking-[0.2em] mb-8 border-b border-slate-800 pb-2">Impact Summary</div>
+           
+           <div className="space-y-8">
+             <div><div className="text-xs text-slate-500 uppercase mb-1 font-bold">Scope</div><div className="font-bold text-2xl font-serif">{data.problemScope || "—"}</div></div>
+             <div><div className="text-xs text-slate-500 uppercase mb-1 font-bold">Key Outcome</div><div className="font-bold text-xl text-teal-200">{data.successMetric || "—"}</div></div>
+             <div><div className="text-xs text-slate-500 uppercase mb-1 font-bold">Mechanism</div><div className="font-bold text-sm leading-snug text-slate-300">{data.scaleMechanism || "—"}</div></div>
+           </div>
+
+           <div className="absolute bottom-8 left-8 text-xs text-slate-600 font-mono">
+             REF: {data.archetype?.toUpperCase()}-{new Date().getFullYear()}
+           </div>
+        </div>
+        
+        {/* Main Content */}
+        <div className="p-12 md:p-20 flex-1 font-serif text-slate-900 overflow-y-auto bg-[#fdfbf7]">
+           <div className="mb-12 border-b-4 border-slate-900 pb-6 flex justify-between items-end font-sans">
+              <div><h1 className="text-[10px] font-bold tracking-[0.3em] text-slate-400 uppercase mb-2">For Immediate Release</h1></div>
+              <div className="text-right"><div className="font-bold text-lg text-slate-900 tracking-tighter">Overdeck Family Foundation</div></div>
+           </div>
+           
+           <h1 className="text-4xl md:text-6xl font-black mb-6 leading-[0.95] tracking-tight">{data.headline || "[Future Headline Goes Here]"}</h1>
+           <h2 className="text-xl md:text-2xl text-slate-500 italic mb-10 font-light leading-relaxed">{data.subheadline}</h2>
+           
+           <div className="prose prose-lg prose-slate max-w-none">
+              <p className="lead text-xl leading-relaxed">
+                <strong className="uppercase text-xs tracking-widest mr-2 text-slate-400 font-sans font-bold">{data.location} — {data.futureDate} —</strong> 
+                Today, the Foundation marked the successful conclusion of <strong>{data.programName}</strong>, an initiative that has fundamentally changed the landscape for {data.beneficiary}.
+              </p>
+              
+              <div className="my-10 pl-8 border-l-4 border-teal-500 italic text-2xl text-slate-800 font-medium">
+                 "{data.internalQuote || "Looking back, we realized..."}"
+                 <div className="text-xs font-sans font-bold text-slate-400 mt-4 not-italic uppercase tracking-widest">— {data.internalSpeaker}</div>
+              </div>
+
+              <h3 className="font-sans font-black text-xs uppercase tracking-widest text-slate-300 mt-12 mb-4">The Challenge (2026)</h3>
+              <p className="text-slate-600">{data.problem}</p>
+
+              <h3 className="font-sans font-black text-xs uppercase tracking-widest text-slate-300 mt-12 mb-4">The Solution</h3>
+              <p className="text-slate-600">{data.solution}</p>
+
+              {data.evidence && (
+                 <div className="bg-white p-8 rounded-sm shadow-sm border border-slate-200 my-10 not-italic font-sans">
+                    <h4 className="font-bold text-xs uppercase tracking-wide mb-2 text-teal-600">The Metric That Mattered</h4>
+                    <p className="font-bold text-3xl text-slate-900">{data.evidence}</p>
+                 </div>
+              )}
+              
+              <div className="my-10 pl-8 border-l-4 border-slate-200 italic text-xl text-slate-500">
+                 "{data.externalQuote}"
+                 <div className="text-xs font-sans font-bold text-slate-400 mt-3 not-italic uppercase tracking-widest">— {data.externalSpeaker}</div>
+              </div>
+           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
