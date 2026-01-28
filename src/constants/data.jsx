@@ -19,7 +19,7 @@ export const STEPS = [
 export const INITIAL_DATA = {
   programName: "", headline: "", subheadline: "", location: "NEW YORK",
   futureDate: "2031-01-27", problem: "", problemScope: "", solution: "", 
-  scaleMechanism: "", evidence: "", successMetric: "", beneficiary: "[Rural students]",
+  scaleMechanism: "", evidence: "", successMetric: "", beneficiary: "",
 
   // Denominator hardening
   denominatorIncluded: "",
@@ -63,3 +63,4 @@ export const GOLD_STANDARDS = {
     }
   }
 };
+
