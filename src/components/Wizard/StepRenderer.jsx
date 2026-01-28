@@ -14,11 +14,13 @@ const JargonWarning = ({ text }) => {
   );
 };
 
-export default function StepRenderer({ stepId, data, onChange, onPreview, missingFields = [] }) {
+export default function StepRenderer({ stepId, data, onChange, onPreview, missingFields = [], showValidation = false }) {
   const inputClass = "w-full p-6 glass-panel rounded-3xl outline-none focus:ring-2 focus:ring-teal-500 text-lg transition-all";
   const labelClass = "block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2";
   const isMissing = (key) => missingFields.some(field => field.key === key);
-  const errorClass = "border border-rose-400 ring-1 ring-rose-200 focus:ring-rose-400";
+  const errorClass = "border border-teal-400/60 ring-1 ring-teal-200/80 focus:ring-teal-400";
+  const errorTextClass = "text-xs text-teal-600 mt-2";
+  const shouldShowMissing = (key) => showValidation && isMissing(key);
 
   const copyToClipboard = async (text, successMsg) => {
     try {
@@ -97,16 +99,16 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
            </div>
            <div>
              <label className={labelClass}>Target Success Date</label>
-             <input type="date" value={data.futureDate} onChange={e => onChange('futureDate', e.target.value)} className={`${inputClass} text-center text-3xl font-serif font-bold ${isMissing('futureDate') ? errorClass : ''}`} />
-             {isMissing('futureDate') && (
-               <p className="text-xs text-rose-600 mt-2">Please choose a target date.</p>
+             <input type="date" value={data.futureDate} onChange={e => onChange('futureDate', e.target.value)} className={`${inputClass} text-center text-3xl font-serif font-bold ${shouldShowMissing('futureDate') ? errorClass : ''}`} />
+             {shouldShowMissing('futureDate') && (
+               <p className={errorTextClass}>Please choose a target date.</p>
              )}
            </div>
            <div>
              <label className={labelClass}>Location</label>
-             <input value={data.location} onChange={e => onChange('location', e.target.value)} className={`w-full p-4 glass-panel rounded-xl outline-none text-center font-bold tracking-widest ${isMissing('location') ? errorClass : ''}`} />
-             {isMissing('location') && (
-               <p className="text-xs text-rose-600 mt-2">Add the location of success.</p>
+             <input value={data.location} onChange={e => onChange('location', e.target.value)} className={`w-full p-4 glass-panel rounded-xl outline-none text-center font-bold tracking-widest ${shouldShowMissing('location') ? errorClass : ''}`} />
+             {shouldShowMissing('location') && (
+               <p className={errorTextClass}>Add the location of success.</p>
              )}
            </div>
         </div>
@@ -116,9 +118,9 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
           <div>
             <label className={labelClass}>The "Old" Reality (Current State)</label>
-            <textarea value={data.problem} onChange={e => onChange('problem', e.target.value)} placeholder="What was the specific friction or failure point?" className={`${inputClass} h-40 ${isMissing('problem') ? errorClass : ''}`} />
-            {isMissing('problem') && (
-              <p className="text-xs text-rose-600 mt-2">Describe the current reality.</p>
+            <textarea value={data.problem} onChange={e => onChange('problem', e.target.value)} placeholder="What was the specific friction or failure point?" className={`${inputClass} h-40 ${shouldShowMissing('problem') ? errorClass : ''}`} />
+            {shouldShowMissing('problem') && (
+              <p className={errorTextClass}>Describe the current reality.</p>
             )}
             <JargonWarning text={data.problem} />
           </div>
@@ -126,16 +128,16 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Who Suffered?</label>
-              <input placeholder="Beneficiary (e.g. Rural Students)" value={data.beneficiary} onChange={e => onChange('beneficiary', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${isMissing('beneficiary') ? errorClass : ''}`} />
-              {isMissing('beneficiary') && (
-                <p className="text-xs text-rose-600 mt-2">Name who felt the pain.</p>
+              <input placeholder="Beneficiary (e.g. Rural Students)" value={data.beneficiary} onChange={e => onChange('beneficiary', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('beneficiary') ? errorClass : ''}`} />
+              {shouldShowMissing('beneficiary') && (
+                <p className={errorTextClass}>Name who felt the pain.</p>
               )}
             </div>
             <div>
               <label className={labelClass}>How Many?</label>
-              <input placeholder="Scope (e.g. 2 Million)" value={data.problemScope} onChange={e => onChange('problemScope', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${isMissing('problemScope') ? errorClass : ''}`} />
-              {isMissing('problemScope') && (
-                <p className="text-xs text-rose-600 mt-2">Add the scale or count.</p>
+              <input placeholder="Scope (e.g. 2 Million)" value={data.problemScope} onChange={e => onChange('problemScope', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('problemScope') ? errorClass : ''}`} />
+              {shouldShowMissing('problemScope') && (
+                <p className={errorTextClass}>Add the scale or count.</p>
               )}
             </div>
           </div>
@@ -143,9 +145,9 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Denominator: Included</label>
-              <input placeholder="Who is counted? (e.g. All K–8 rural students in US public schools)" value={data.denominatorIncluded} onChange={e => onChange('denominatorIncluded', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${isMissing('denominatorIncluded') ? errorClass : ''}`} />
-              {isMissing('denominatorIncluded') && (
-                <p className="text-xs text-rose-600 mt-2">Define who is included.</p>
+              <input placeholder="Who is counted? (e.g. All K–8 rural students in US public schools)" value={data.denominatorIncluded} onChange={e => onChange('denominatorIncluded', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('denominatorIncluded') ? errorClass : ''}`} />
+              {shouldShowMissing('denominatorIncluded') && (
+                <p className={errorTextClass}>Define who is included.</p>
               )}
             </div>
             <div>
@@ -164,17 +166,17 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
 
           <div>
              <label className={labelClass}>The Mechanism of Change</label>
-             <textarea value={data.solution} onChange={e => onChange('solution', e.target.value)} placeholder="The specific intervention that broke the pattern..." className={`${inputClass} h-40 ${isMissing('solution') ? errorClass : ''}`} />
-             {isMissing('solution') && (
-               <p className="text-xs text-rose-600 mt-2">Describe the mechanism that changed outcomes.</p>
+             <textarea value={data.solution} onChange={e => onChange('solution', e.target.value)} placeholder="The specific intervention that broke the pattern..." className={`${inputClass} h-40 ${shouldShowMissing('solution') ? errorClass : ''}`} />
+             {shouldShowMissing('solution') && (
+               <p className={errorTextClass}>Describe the mechanism that changed outcomes.</p>
              )}
              <JargonWarning text={data.solution} />
           </div>
 
           <input placeholder="Name of Initiative" value={data.programName} onChange={e => onChange('programName', e.target.value)} className="w-full p-4 glass-panel rounded-2xl outline-none font-bold" />
-          <input placeholder="Mechanism of Scale (How did it grow?)" value={data.scaleMechanism} onChange={e => onChange('scaleMechanism', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${isMissing('scaleMechanism') ? errorClass : ''}`} />
-          {isMissing('scaleMechanism') && (
-            <p className="text-xs text-rose-600 mt-2">Explain how it scaled.</p>
+          <input placeholder="Mechanism of Scale (How did it grow?)" value={data.scaleMechanism} onChange={e => onChange('scaleMechanism', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('scaleMechanism') ? errorClass : ''}`} />
+          {shouldShowMissing('scaleMechanism') && (
+            <p className={errorTextClass}>Explain how it scaled.</p>
           )}
         </div>
     );
@@ -187,15 +189,15 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
 
            <div>
              <label className={labelClass}>The Undeniable Proof</label>
-             <textarea value={data.evidence} onChange={e => onChange('evidence', e.target.value)} placeholder="What data point proved the skeptics wrong?" className={`${inputClass} h-40 ${isMissing('evidence') ? errorClass : ''}`} />
-             {isMissing('evidence') && (
-               <p className="text-xs text-rose-600 mt-2">Add the proof point.</p>
+             <textarea value={data.evidence} onChange={e => onChange('evidence', e.target.value)} placeholder="What data point proved the skeptics wrong?" className={`${inputClass} h-40 ${shouldShowMissing('evidence') ? errorClass : ''}`} />
+             {shouldShowMissing('evidence') && (
+               <p className={errorTextClass}>Add the proof point.</p>
              )}
            </div>
 
-           <input placeholder="Headline Success Metric (e.g. 95% Retention)" value={data.successMetric} onChange={e => onChange('successMetric', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none text-teal-700 font-bold ${isMissing('successMetric') ? errorClass : ''}`} />
-           {isMissing('successMetric') && (
-             <p className="text-xs text-rose-600 mt-2">Include the key metric.</p>
+           <input placeholder="Headline Success Metric (e.g. 95% Retention)" value={data.successMetric} onChange={e => onChange('successMetric', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none text-teal-700 font-bold ${shouldShowMissing('successMetric') ? errorClass : ''}`} />
+           {shouldShowMissing('successMetric') && (
+             <p className={errorTextClass}>Include the key metric.</p>
            )}
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -205,9 +207,9 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
              </div>
              <div>
                <label className={labelClass}>Why can’t they?</label>
-               <input placeholder="What makes it portable / undeniable?" value={data.sinatraWhyUndeniable} onChange={e => onChange('sinatraWhyUndeniable', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${isMissing('sinatraWhyUndeniable') ? errorClass : ''}`} />
-               {isMissing('sinatraWhyUndeniable') && (
-                 <p className="text-xs text-rose-600 mt-2">Clarify why it can’t be disputed.</p>
+               <input placeholder="What makes it portable / undeniable?" value={data.sinatraWhyUndeniable} onChange={e => onChange('sinatraWhyUndeniable', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('sinatraWhyUndeniable') ? errorClass : ''}`} />
+               {shouldShowMissing('sinatraWhyUndeniable') && (
+                 <p className={errorTextClass}>Clarify why it can’t be disputed.</p>
                )}
              </div>
            </div>
@@ -223,17 +225,17 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
               <label className={labelClass}>Internal Reflection</label>
-              <textarea placeholder="Looking back, we realized..." value={data.internalQuote} onChange={e => onChange('internalQuote', e.target.value)} className={`w-full p-4 h-40 glass-panel rounded-2xl outline-none text-sm italic ${isMissing('internalQuote') ? errorClass : ''}`} />
-              {isMissing('internalQuote') && (
-                <p className="text-xs text-rose-600 mt-2">Add the internal reflection.</p>
+              <textarea placeholder="Looking back, we realized..." value={data.internalQuote} onChange={e => onChange('internalQuote', e.target.value)} className={`w-full p-4 h-40 glass-panel rounded-2xl outline-none text-sm italic ${shouldShowMissing('internalQuote') ? errorClass : ''}`} />
+              {shouldShowMissing('internalQuote') && (
+                <p className={errorTextClass}>Add the internal reflection.</p>
               )}
               <input placeholder="Speaker Name/Title" value={data.internalSpeaker} onChange={e => onChange('internalSpeaker', e.target.value)} className="w-full p-3 glass-panel rounded-xl text-xs" />
             </div>
             <div className="space-y-3">
               <label className={labelClass}>Beneficiary Voice</label>
-              <textarea placeholder="Before this program, I used to..." value={data.externalQuote} onChange={e => onChange('externalQuote', e.target.value)} className={`w-full p-4 h-40 glass-panel rounded-2xl outline-none text-sm italic border-l-4 border-teal-500 ${isMissing('externalQuote') ? errorClass : ''}`} />
-              {isMissing('externalQuote') && (
-                <p className="text-xs text-rose-600 mt-2">Add the beneficiary quote.</p>
+              <textarea placeholder="Before this program, I used to..." value={data.externalQuote} onChange={e => onChange('externalQuote', e.target.value)} className={`w-full p-4 h-40 glass-panel rounded-2xl outline-none text-sm italic border-l-4 border-teal-500 ${shouldShowMissing('externalQuote') ? errorClass : ''}`} />
+              {shouldShowMissing('externalQuote') && (
+                <p className={errorTextClass}>Add the beneficiary quote.</p>
               )}
               <input placeholder="Speaker Name/Title" value={data.externalSpeaker} onChange={e => onChange('externalSpeaker', e.target.value)} className="w-full p-3 glass-panel rounded-xl text-xs" />
             </div>
@@ -249,9 +251,9 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
 
           <div>
             <label className={labelClass}>The Press Release Headline</label>
-            <textarea value={data.headline} onChange={e => onChange('headline', e.target.value)} placeholder="Catalyst + Verb + Metric + Population" className={`w-full p-8 text-3xl font-serif font-bold glass-panel rounded-[2.5rem] outline-none focus:ring-2 focus:ring-teal-500 leading-tight ${isMissing('headline') ? errorClass : ''}`} />
-            {isMissing('headline') && (
-              <p className="text-xs text-rose-600 mt-2">Write the headline before moving on.</p>
+            <textarea value={data.headline} onChange={e => onChange('headline', e.target.value)} placeholder="Catalyst + Verb + Metric + Population" className={`w-full p-8 text-3xl font-serif font-bold glass-panel rounded-[2.5rem] outline-none focus:ring-2 focus:ring-teal-500 leading-tight ${shouldShowMissing('headline') ? errorClass : ''}`} />
+            {shouldShowMissing('headline') && (
+              <p className={errorTextClass}>Write the headline before moving on.</p>
             )}
           </div>
           <input placeholder="Subheadline context..." value={data.subheadline} onChange={e => onChange('subheadline', e.target.value)} className="w-full p-4 glass-panel rounded-2xl outline-none italic text-slate-500" />
