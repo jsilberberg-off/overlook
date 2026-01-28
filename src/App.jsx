@@ -16,31 +16,47 @@ export default function App() {
 
   const stepId = STEPS[activeStep]?.id;
 
-  const canGoNext = useMemo(() => {
+  const requiredFieldsByStep = useMemo(() => ({
+    context: [
+      { key: 'futureDate', label: 'Target Success Date' },
+      { key: 'location', label: 'Location' }
+    ],
+    problem: [
+      { key: 'problem', label: 'Old Reality' },
+      { key: 'beneficiary', label: 'Beneficiary' },
+      { key: 'problemScope', label: 'Scope' },
+      { key: 'denominatorIncluded', label: 'Denominator Included' }
+    ],
+    solution: [
+      { key: 'solution', label: 'Mechanism of Change' },
+      { key: 'scaleMechanism', label: 'Mechanism of Scale' }
+    ],
+    evidence: [
+      { key: 'evidence', label: 'Undeniable Proof' },
+      { key: 'successMetric', label: 'Success Metric' },
+      { key: 'sinatraWhyUndeniable', label: 'Why It’s Undeniable' }
+    ],
+    stakeholder: [
+      { key: 'internalQuote', label: 'Internal Reflection' },
+      { key: 'externalQuote', label: 'Beneficiary Voice' }
+    ],
+    headline: [
+      { key: 'headline', label: 'Press Release Headline' }
+    ]
+  }), []);
+
+  const missingFields = useMemo(() => {
     const has = (v) => typeof v === 'string' ? v.trim().length > 0 : v !== null && v !== undefined;
-    switch (stepId) {
-      case 'frame':
-        return true;
-      case 'context':
-        return has(data.futureDate) && has(data.location);
-      case 'problem':
-        return has(data.problem) && has(data.beneficiary) && has(data.problemScope) && has(data.denominatorIncluded);
-      case 'solution':
-        return has(data.solution) && has(data.scaleMechanism);
-      case 'evidence':
-        return has(data.evidence) && has(data.successMetric) && has(data.sinatraWhyUndeniable);
-      case 'stakeholder':
-        return has(data.internalQuote) && has(data.externalQuote);
-      case 'headline':
-        return has(data.headline);
-      case 'review':
-        return true;
-      case 'next':
-        return false;
-      default:
-        return true;
-    }
-  }, [stepId, data]);
+    return (requiredFieldsByStep[stepId] || [])
+      .filter(({ key }) => !has(data[key]))
+      .map((field) => field);
+  }, [stepId, data, requiredFieldsByStep]);
+
+  const canGoNext = useMemo(() => {
+    if (stepId === 'next') return false;
+    if (stepId === 'frame' || stepId === 'review') return true;
+    return missingFields.length === 0;
+  }, [stepId, missingFields]);
 
   const nextDisabled = activeStep >= STEPS.length - 1 || !canGoNext;
 
@@ -113,6 +129,7 @@ export default function App() {
                 data={data}
                 onChange={updateField}
                 onPreview={() => setShowPreview(true)}
+                missingFields={missingFields}
               />
             </div>
 
@@ -126,14 +143,21 @@ export default function App() {
                 <ArrowLeft className="w-4 h-4" /> Previous
               </button>
 
-              <button
-                onClick={handleNext}
-                disabled={nextDisabled}
-                title={!canGoNext ? "Complete the required fields to continue." : ""}
-                className={`pointer-events-auto flex items-center gap-2 px-8 py-3 rounded-full font-bold text-sm transition-all shadow-xl hover:shadow-2xl ${activeStep === STEPS.length - 1 ? 'hidden' : 'flex'} ${nextDisabled ? 'bg-slate-400 text-white cursor-not-allowed' : 'bg-slate-900 text-white hover:scale-105'}`}
-              >
-                Next Step <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="pointer-events-auto flex flex-col items-end gap-2">
+                {missingFields.length > 0 && activeStep < STEPS.length - 1 && (
+                  <div className="text-xs text-rose-600 bg-rose-50 border border-rose-100 px-3 py-1.5 rounded-full">
+                    Missing: {missingFields.map(field => field.label).join(', ')}
+                  </div>
+                )}
+                <button
+                  onClick={handleNext}
+                  disabled={nextDisabled}
+                  title={!canGoNext ? "Complete the required fields to continue." : ""}
+                  className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold text-sm transition-all shadow-xl hover:shadow-2xl ${activeStep === STEPS.length - 1 ? 'hidden' : 'flex'} ${nextDisabled ? 'bg-slate-400 text-white cursor-not-allowed' : 'bg-slate-900 text-white hover:scale-105'}`}
+                >
+                  Next Step <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </main>
         </div>
