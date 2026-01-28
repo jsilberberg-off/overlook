@@ -6,19 +6,28 @@ export function useStrategyDraft() {
   const [data, setData] = useState(INITIAL_DATA);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
+  const [draftId, setDraftId] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('id');
+  });
 
   // Load from URL or LocalStorage on mount
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
-    
-    if (id && supabase) {
-      loadFromSupabase(id);
+    if (draftId && supabase) {
+      loadFromSupabase(draftId);
     } else {
       const local = localStorage.getItem('overlook_draft');
       if (local) setData(JSON.parse(local));
     }
   }, []);
+
+  useEffect(() => {
+    if (!draftId) return;
+    const newUrl = `${window.location.pathname}?id=${draftId}`;
+    if (window.location.search !== `?id=${draftId}`) {
+      window.history.replaceState({ path: newUrl }, '', newUrl);
+    }
+  }, [draftId]);
 
   // Save to LocalStorage on every change (Safety net)
   useEffect(() => {
@@ -55,6 +64,7 @@ export function useStrategyDraft() {
     }
     setIsSaving(true);
     const payload = {
+      ...(draftId ? { id: draftId } : {}),
       program_name: data.programName, headline: data.headline, subheadline: data.subheadline,
       location: data.location, future_date: data.futureDate, problem: data.problem,
       problem_scope: data.problemScope, solution: data.solution, scale_mechanism: data.scaleMechanism,
@@ -63,12 +73,14 @@ export function useStrategyDraft() {
       external_quote: data.externalQuote, external_speaker: data.externalSpeaker, archetype: data.archetype
     };
 
-    const { data: saved, error } = await supabase.from('press_releases').upsert(payload).select();
+    const { data: saved, error } = await supabase
+      .from('press_releases')
+      .upsert(payload, { onConflict: 'id' })
+      .select();
     
     if (!error && saved?.[0]) {
-       const newUrl = `${window.location.pathname}?id=${saved[0].id}`;
-       window.history.pushState({ path: newUrl }, '', newUrl);
-       setLastSaved(new Date());
+      setDraftId(saved[0].id);
+      setLastSaved(new Date());
     } else {
        console.error("Save Error", error);
        alert("Failed to save to cloud.");
