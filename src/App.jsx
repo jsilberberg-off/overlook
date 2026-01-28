@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Telescope, Save, Share2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useStrategyDraft } from './hooks/useStrategyDraft';
 import Sidebar from './components/Layout/Sidebar';
@@ -9,6 +9,7 @@ import { STEPS } from './constants/data';
 export default function App() {
   const [activeStep, setActiveStep] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
+  const [showValidation, setShowValidation] = useState(false);
 
   const { 
     data, updateField, saveStrategy, loadTemplate, isSaving, lastSaved 
@@ -61,13 +62,20 @@ export default function App() {
   const nextDisabled = activeStep >= STEPS.length - 1 || !canGoNext;
 
   const handleNext = () => {
-    if (nextDisabled) return;
+    if (nextDisabled) {
+      setShowValidation(true);
+      return;
+    }
     if (activeStep < STEPS.length - 1) setActiveStep(prev => prev + 1);
   };
 
   const handleBack = () => {
     if (activeStep > 0) setActiveStep(prev => prev - 1);
   };
+
+  useEffect(() => {
+    setShowValidation(false);
+  }, [activeStep]);
 
   const copyShareLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -130,6 +138,7 @@ export default function App() {
                 onChange={updateField}
                 onPreview={() => setShowPreview(true)}
                 missingFields={missingFields}
+                showValidation={showValidation}
               />
             </div>
 
@@ -144,8 +153,8 @@ export default function App() {
               </button>
 
               <div className="pointer-events-auto flex flex-col items-end gap-2">
-                {missingFields.length > 0 && activeStep < STEPS.length - 1 && (
-                  <div className="text-xs text-rose-600 bg-rose-50 border border-rose-100 px-3 py-1.5 rounded-full">
+                {showValidation && missingFields.length > 0 && activeStep < STEPS.length - 1 && (
+                  <div className="text-xs text-teal-700 bg-teal-50/80 border border-teal-100 px-3 py-1.5 rounded-full">
                     Missing: {missingFields.map(field => field.label).join(', ')}
                   </div>
                 )}
