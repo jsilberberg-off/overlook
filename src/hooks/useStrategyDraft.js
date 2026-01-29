@@ -1,9 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { INITIAL_DATA } from '../constants/data';
 
 export function useStrategyDraft() {
-  const [data, setData] = useState(INITIAL_DATA);
+  const [data, setData] = useState(() => {
+    const local = localStorage.getItem('overlook_draft');
+    return local ? JSON.parse(local) : INITIAL_DATA;
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
   const [draftId, setDraftId] = useState(() => {
@@ -13,13 +16,26 @@ export function useStrategyDraft() {
 
   // Load from URL or LocalStorage on mount
   useEffect(() => {
-    if (draftId && supabase) {
-      loadFromSupabase(draftId);
-    } else {
-      const local = localStorage.getItem('overlook_draft');
-      if (local) setData(JSON.parse(local));
-    }
-  }, []);
+    if (!draftId || !supabase) return;
+    let isActive = true;
+    const loadFromSupabase = async (id) => {
+      const { data: draft } = await supabase.from('press_releases').select('*').eq('id', id).single();
+      if (!isActive || !draft) return;
+      // Map snake_case DB to camelCase State
+      setData({
+        programName: draft.program_name, headline: draft.headline, subheadline: draft.subheadline,
+        location: draft.location, futureDate: draft.future_date, problem: draft.problem,
+        problemScope: draft.problem_scope, solution: draft.solution, scaleMechanism: draft.scale_mechanism,
+        evidence: draft.evidence, successMetric: draft.success_metric, beneficiary: draft.beneficiary,
+        internalQuote: draft.internal_quote, internalSpeaker: draft.internal_speaker,
+        externalQuote: draft.external_quote, externalSpeaker: draft.external_speaker, archetype: draft.archetype
+      });
+    };
+    loadFromSupabase(draftId);
+    return () => {
+      isActive = false;
+    };
+  }, [draftId]);
 
   useEffect(() => {
     if (!draftId) return;
@@ -33,21 +49,6 @@ export function useStrategyDraft() {
   useEffect(() => {
     localStorage.setItem('overlook_draft', JSON.stringify(data));
   }, [data]);
-
-  const loadFromSupabase = async (id) => {
-    const { data: draft } = await supabase.from('press_releases').select('*').eq('id', id).single();
-    if (draft) {
-      // Map snake_case DB to camelCase State
-      setData({
-        programName: draft.program_name, headline: draft.headline, subheadline: draft.subheadline,
-        location: draft.location, futureDate: draft.future_date, problem: draft.problem,
-        problemScope: draft.problem_scope, solution: draft.solution, scaleMechanism: draft.scale_mechanism,
-        evidence: draft.evidence, successMetric: draft.success_metric, beneficiary: draft.beneficiary,
-        internalQuote: draft.internal_quote, internalSpeaker: draft.internal_speaker,
-        externalQuote: draft.external_quote, externalSpeaker: draft.external_speaker, archetype: draft.archetype
-      });
-    }
-  };
 
   const updateField = (field, value) => {
     setData(prev => ({ ...prev, [field]: value }));

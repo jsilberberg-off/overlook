@@ -45,28 +45,3 @@ export const INITIAL_DATA = {
   archetype: "tech"
 };
 
-export const GOLD_STANDARDS = {
-  tech: {
-    label: "Tech-Enabled",
-    data: {
-      problem: "In 2024, rural students were 2 years behind their urban peers in math.",
-      solution: "We deployed an AI-driven personal tutor that adapted to local dialects and worked offline.",
-      evidence: "A longitudinal study showed students in these districts outpaced the national math average by 40%.",
-      headline: "Offline-First 'Socrates' AI App Eradicates Math Mastery Gap for 2M Rural Students",
-      beneficiary: "Rural Students",
-      archetype: 'tech'
-    }
-  },
-  educator: {
-    label: "Educator Support",
-    data: {
-      problem: "The Retention Crisis: 40% of new teachers were leaving within three years.",
-      solution: "We built a national 'Mentor-Network' that paired every new teacher with a veteran 'Master Coach'.",
-      evidence: "Turnover dropped by $12M annually, allowing for a 10% base salary increase.",
-      headline: "Master-Coach 'Check-In' Model Drives Historic 95% Teacher Retention",
-      beneficiary: "New Teachers",
-      archetype: 'educator'
-    }
-  }
-};
-

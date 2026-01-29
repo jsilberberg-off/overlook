@@ -14,7 +14,7 @@ export default function App() {
   const [showValidation, setShowValidation] = useState(false);
 
   const { 
-    data, updateField, saveStrategy, loadTemplate, isSaving, lastSaved 
+    data, updateField, saveStrategy, isSaving, lastSaved 
   } = useStrategyDraft();
 
   const stepId = STEPS[activeStep]?.id;
@@ -147,7 +147,6 @@ export default function App() {
           <Sidebar
             activeStep={activeStep}
             setActiveStep={setActiveStep}
-            onLoadTemplate={loadTemplate}
           />
 
           <main className="flex-1 overflow-y-auto p-8 md:p-12 relative scroll-smooth">

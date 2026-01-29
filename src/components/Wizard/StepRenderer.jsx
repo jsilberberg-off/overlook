@@ -34,7 +34,7 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
     try {
       await navigator.clipboard.writeText(text);
       alert(successMsg || "Copied to clipboard.");
-    } catch (e) {
+    } catch {
       alert("Couldn't copy automatically. Please copy manually.");
     }
   };
@@ -98,9 +98,6 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
           </div>
         </div>
 
-        <div className="text-center text-xs text-slate-400">
-          Tip: You can use templates in the sidebar if you want a starting point.
-        </div>
       </div>
     );
 
