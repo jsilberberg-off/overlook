@@ -1,79 +1,99 @@
 // api/ai-coach.js
-import OpenAI from "openai";
-
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-// Keep responses small + deterministic.
-function clampList(arr, max = 3) {
-  return Array.isArray(arr) ? arr.slice(0, max) : [];
-}
 
 export default async function handler(req, res) {
-  // CORS (safe default). Tighten origins later if you want.
+  // --- CORS (safe default for internal tool) ---
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") return res.status(200).end();
-  if (req.method !== "POST") return res.status(405).json({ error: "Use POST" });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Use POST" });
+  }
 
-  try {
-    const { stepId, data } = req.body ?? {};
-    if (!stepId || !data) {
-      return res.status(400).json({ error: "Missing stepId or data" });
-    }
+  const { stepId, data } = req.body || {};
+  if (!stepId || !data) {
+    return res.status(400).json({ error: "Missing stepId or data" });
+  }
 
-    // Prompt: "skeptical PM for internal board audience"
-    const system = `
-You are an internal portfolio manager coach helping a foundation PM prepare an internal future retrospective.
-Be skeptical, concise, and decision-oriented. Do NOT invent facts, numbers, partners, or evidence.
-Only use numbers that appear in the user's input. If missing, recommend placeholders.
-Return JSON only, matching the schema exactly.
-`;
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(500).json({ error: "OPENAI_API_KEY not configured" });
+  }
 
-    const user = `
+  const systemPrompt = `
+You are an internal portfolio-manager coach helping prepare a future retrospective
+for foundation leadership / board review.
+
+Be skeptical, concise, and decision-oriented.
+Do NOT invent numbers, evidence, partners, or outcomes.
+Only critique what is present; if information is missing, flag it.
+
+Return JSON ONLY, matching this schema exactly:
+{
+  "score": number,
+  "improvements": string[],
+  "risks": string[],
+  "questions": string[]
+}
+`.trim();
+
+  const userPrompt = `
 STEP: ${stepId}
-INPUT JSON:
+
+INPUT (JSON):
 ${JSON.stringify(data, null, 2)}
 
-Task:
-1) Give a score 0-100 for decision-quality (clarity, measurability, plausibility, cost/scale realism, evidence alignment).
-2) List up to 3 improvements (highest leverage).
-3) List up to 3 risks/overclaims (what leadership would challenge).
-4) List up to 3 board-level questions.
-Return JSON with keys: score (number), improvements (string[]), risks (string[]), questions (string[]).
-`;
+Tasks:
+1. Score decision quality (0–100): clarity, measurability, plausibility, cost/scale realism, evidence alignment.
+2. List up to 3 highest-leverage improvements.
+3. List up to 3 risks or overclaims leadership would challenge.
+4. List up to 3 board-level questions.
+`.trim();
 
-    // Use a current, stable model name that your account supports.
-    // If you prefer another model, swap it here.
-    const completion = await client.chat.completions.create({
-      model: "gpt-4o-mini",
-      temperature: 0.2,
-      messages: [
-        { role: "system", content: system.trim() },
-        { role: "user", content: user.trim() },
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 700,
+  try {
+    const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0.2,
+        max_tokens: 600,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ]
+      })
     });
 
-    const raw = completion.choices?.[0]?.message?.content ?? "{}";
+    if (!openaiResponse.ok) {
+      const errText = await openaiResponse.text();
+      console.error("OpenAI error:", errText);
+      return res.status(500).json({ error: "OpenAI request failed" });
+    }
+
+    const result = await openaiResponse.json();
+    const content = result.choices?.[0]?.message?.content || "{}";
+
     let parsed;
     try {
-      parsed = JSON.parse(raw);
+      parsed = JSON.parse(content);
     } catch {
-      // If the model ever fails JSON, return a safe fallback.
       parsed = { score: 50, improvements: [], risks: [], questions: [] };
     }
 
     return res.status(200).json({
       score: Number.isFinite(parsed.score) ? parsed.score : 50,
-      improvements: clampList(parsed.improvements, 3),
-      risks: clampList(parsed.risks, 3),
-      questions: clampList(parsed.questions, 3),
+      improvements: (parsed.improvements || []).slice(0, 3),
+      risks: (parsed.risks || []).slice(0, 3),
+      questions: (parsed.questions || []).slice(0, 3)
     });
+
   } catch (err) {
-    console.error(err);
+    console.error("AI coach exception:", err);
     return res.status(500).json({ error: "AI coach failed" });
   }
 }
