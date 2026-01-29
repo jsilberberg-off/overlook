@@ -150,10 +150,25 @@ export default function App() {
             onLoadTemplate={loadTemplate}
           />
 
-          <main className="flex-1 flex flex-col p-8 md:p-12 relative">
-            <div className="max-w-3xl mx-auto w-full">
+          <main className="flex-1 overflow-y-auto p-8 md:p-12 relative scroll-smooth">
+            <div className="max-w-3xl mx-auto pb-16">
+              <StepRenderer
+                stepId={STEPS[activeStep].id}
+                data={data}
+                onChange={updateField}
+                onPreview={() => setShowPreview(true)}
+                missingFields={missingFields}
+                showValidation={showValidation}
+              />
+
+              <CoachPanel
+                stepId={stepId}
+                data={data}
+                missingFields={missingFields}
+              />
+
               {/* Navigation */}
-              <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/70 bg-white/95 backdrop-blur px-5 py-4 shadow-sm">
+              <div className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/70 bg-white/80 px-5 py-4 shadow-sm">
                 <button
                   onClick={handleBack}
                   disabled={activeStep === 0}
@@ -177,25 +192,6 @@ export default function App() {
                     Next Step <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
-            </div>
-
-            <div className="flex-1 min-h-0 overflow-y-auto scroll-smooth">
-              <div className="max-w-3xl mx-auto pt-8 pb-24">
-                <StepRenderer
-                  stepId={STEPS[activeStep].id}
-                  data={data}
-                  onChange={updateField}
-                  onPreview={() => setShowPreview(true)}
-                  missingFields={missingFields}
-                  showValidation={showValidation}
-                />
-
-                <CoachPanel
-                  stepId={stepId}
-                  data={data}
-                  missingFields={missingFields}
-                />
               </div>
             </div>
           </main>
