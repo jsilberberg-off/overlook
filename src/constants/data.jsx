@@ -21,6 +21,12 @@ export const INITIAL_DATA = {
   futureDate: "2031-01-27", problem: "", problemScope: "", solution: "", 
   scaleMechanism: "", evidence: "", successMetric: "", beneficiary: "",
 
+  // Decision-grade additions (internal use; optional)
+  decisionToInform: "",
+  keyRisks: "",
+  killCriteria: "",
+  nextExperiment: "",
+
   // Denominator hardening
   denominatorIncluded: "",
   denominatorExcluded: "",

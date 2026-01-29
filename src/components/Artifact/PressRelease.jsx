@@ -20,6 +20,38 @@ export default function PressReleaseArtifact({ data, onClose }) {
              <div><div className="text-xs text-slate-500 uppercase mb-1 font-bold">Mechanism</div><div className="font-bold text-sm leading-snug text-slate-300">{data.scaleMechanism || "—"}</div></div>
            </div>
 
+           {(data.decisionToInform || data.keyRisks || data.killCriteria || data.nextExperiment) && (
+             <div className="mt-10 pt-8 border-t border-slate-800">
+               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Internal Decision Notes</div>
+               <div className="space-y-4 text-xs text-slate-300">
+                 {data.decisionToInform && (
+                   <div>
+                     <div className="text-slate-500 uppercase font-bold mb-1">Decision</div>
+                     <div className="leading-snug">{data.decisionToInform}</div>
+                   </div>
+                 )}
+                 {data.keyRisks && (
+                   <div>
+                     <div className="text-slate-500 uppercase font-bold mb-1">Risks</div>
+                     <div className="leading-snug">{data.keyRisks}</div>
+                   </div>
+                 )}
+                 {data.killCriteria && (
+                   <div>
+                     <div className="text-slate-500 uppercase font-bold mb-1">Kill Criteria</div>
+                     <div className="leading-snug">{data.killCriteria}</div>
+                   </div>
+                 )}
+                 {data.nextExperiment && (
+                   <div>
+                     <div className="text-slate-500 uppercase font-bold mb-1">Next 90 Days</div>
+                     <div className="leading-snug">{data.nextExperiment}</div>
+                   </div>
+                 )}
+               </div>
+             </div>
+           )}
+
            <div className="absolute bottom-8 left-8 text-xs text-slate-600 font-mono">
              REF: {data.archetype?.toUpperCase()}-{new Date().getFullYear()}
            </div>
@@ -28,12 +60,21 @@ export default function PressReleaseArtifact({ data, onClose }) {
         {/* Main Content */}
         <div className="p-12 md:p-20 flex-1 font-serif text-slate-900 overflow-y-auto bg-[#fdfbf7]">
            <div className="mb-12 border-b-4 border-slate-900 pb-6 flex justify-between items-end font-sans">
-              <div><h1 className="text-[10px] font-bold tracking-[0.3em] text-slate-400 uppercase mb-2">For Immediate Release</h1></div>
+              <div>
+                <h1 className="text-[10px] font-bold tracking-[0.3em] text-slate-400 uppercase mb-2">
+                  Internal Draft — Future Retrospective
+                </h1>
+                <div className="text-[10px] font-bold tracking-[0.3em] text-slate-300 uppercase">
+                  Not for distribution
+                </div>
+              </div>
               <div className="text-right"><div className="font-bold text-lg text-slate-900 tracking-tighter">Overdeck Family Foundation</div></div>
            </div>
            
            <h1 className="text-4xl md:text-6xl font-black mb-6 leading-[0.95] tracking-tight">{data.headline || "[Future Headline Goes Here]"}</h1>
-           <h2 className="text-xl md:text-2xl text-slate-500 italic mb-10 font-light leading-relaxed">{data.subheadline}</h2>
+           <h2 className="text-xl md:text-2xl text-slate-500 italic mb-10 font-light leading-relaxed">
+             {data.subheadline || "[Optional subheadline: add scale + mechanism + time window]"}
+           </h2>
            
            <div className="prose prose-lg prose-slate max-w-none">
               <p className="lead text-xl leading-relaxed">

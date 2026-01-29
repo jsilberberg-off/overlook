@@ -1,16 +1,56 @@
-# React + Vite
+# OverLook — Future Retrospective Lab
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+OverLook is a lightweight “write from the future” tool for pressure-testing strategies and grant ideas.
 
-Currently, two official plugins are available:
+## V2 changes included in this repo
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1) Auto-drafted headline and subheadline
+When you enter **The Headline Lab**, the app now generates draft headline/subheadline options from earlier inputs (no invented facts).
 
-## React Compiler
+- If your headline/subheadline are empty, the top draft is auto-filled.
+- You can click any suggested headline/subheadline to apply it.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Draft logic lives in:
+- `src/utils/pressReleaseDrafts.js`
 
-## Expanding the ESLint configuration
+### 2) Coach panel (quality checks + optional AI)
+Each step now has a **Coach** panel:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Deterministic “lint” checks (numbers, denominator clarity, scale mechanism, etc.)
+- Optional AI feedback if you configure an endpoint
+
+Heuristic checks live in:
+- `src/utils/coachHeuristics.js`
+
+#### Enable AI feedback
+Set an environment variable:
+
+```bash
+VITE_AI_COACH_ENDPOINT=https://your-domain.com/ai-coach
+```
+
+Your endpoint should accept:
+
+```json
+{ "stepId": "problem", "data": { "...": "..." } }
+```
+
+And return JSON (recommended shape):
+
+```json
+{
+  "score": 78,
+  "improvements": ["..."],
+  "risks": ["..."]
+}
+```
+
+The client integration is in:
+- `src/services/aiCoach.js`
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
