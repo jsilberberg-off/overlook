@@ -133,6 +133,28 @@ export default function App() {
                 Saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
+            <div className="flex items-center gap-3">
+              {showValidation && missingFields.length > 0 && activeStep < STEPS.length - 1 && (
+                <div className="text-xs text-teal-700 bg-teal-50/80 border border-teal-100 px-3 py-1.5 rounded-full">
+                  Missing: {missingFields.map(field => field.label).join(', ')}
+                </div>
+              )}
+              <button
+                onClick={handleBack}
+                disabled={activeStep === 0}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold text-xs transition-all ${activeStep === 0 ? 'opacity-40 cursor-not-allowed bg-white text-slate-300' : 'bg-white hover:bg-slate-50 text-slate-600 shadow-lg hover:shadow-xl'}`}
+              >
+                <ArrowLeft className="w-4 h-4" /> Previous
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={nextDisabled}
+                title={!canGoNext ? "Complete the required fields to continue." : ""}
+                className={`flex items-center gap-2 px-5 py-2 rounded-full font-bold text-xs transition-all shadow-xl hover:shadow-2xl ${activeStep === STEPS.length - 1 ? 'hidden' : 'flex'} ${nextDisabled ? 'bg-slate-400 text-white cursor-not-allowed' : 'bg-slate-900 text-white hover:scale-105'}`}
+              >
+                Next Step <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
             <button onClick={copyShareLink} className="p-3 hover:bg-white/80 rounded-xl transition text-slate-500 hover:text-teal-600" title="Copy Link">
               <Share2 className="w-5 h-5" />
             </button>
@@ -166,32 +188,6 @@ export default function App() {
                 missingFields={missingFields}
               />
 
-              {/* Navigation */}
-              <div className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/70 bg-white/80 px-5 py-4 shadow-sm">
-                <button
-                  onClick={handleBack}
-                  disabled={activeStep === 0}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm transition-all ${activeStep === 0 ? 'opacity-0' : 'bg-white hover:bg-slate-50 text-slate-600 shadow-lg hover:shadow-xl'}`}
-                >
-                  <ArrowLeft className="w-4 h-4" /> Previous
-                </button>
-
-                <div className="flex flex-col items-end gap-2">
-                  {showValidation && missingFields.length > 0 && activeStep < STEPS.length - 1 && (
-                    <div className="text-xs text-teal-700 bg-teal-50/80 border border-teal-100 px-3 py-1.5 rounded-full">
-                      Missing: {missingFields.map(field => field.label).join(', ')}
-                    </div>
-                  )}
-                  <button
-                    onClick={handleNext}
-                    disabled={nextDisabled}
-                    title={!canGoNext ? "Complete the required fields to continue." : ""}
-                    className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold text-sm transition-all shadow-xl hover:shadow-2xl ${activeStep === STEPS.length - 1 ? 'hidden' : 'flex'} ${nextDisabled ? 'bg-slate-400 text-white cursor-not-allowed' : 'bg-slate-900 text-white hover:scale-105'}`}
-                  >
-                    Next Step <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
             </div>
           </main>
         </div>
