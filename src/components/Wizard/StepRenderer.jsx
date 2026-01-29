@@ -1,20 +1,28 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Telescope, Target, Zap, BarChart3, Users, Sparkles, ShieldCheck, FileText, CalendarClock, Copy } from 'lucide-react';
 import { JARGON_LIST } from '../../constants/data';
+import { generateHeadlineCandidates, generateSubheadlineCandidates } from '../../utils/pressReleaseDrafts';
 
 // Helper for Jargon Warning
-const JargonWarning = ({ text }) => {
+const yearFromDate = (dateStr) => {
+  if (!dateStr) return '';
+  const year = new Date(dateStr).getFullYear();
+  return Number.isFinite(year) ? year : '';
+};
+
+const JargonWarning = ({ text, year }) => {
   const foundJargon = JARGON_LIST.filter(word => text?.toLowerCase().includes(word));
   if (foundJargon.length === 0) return null;
   return (
     <div className="text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg mt-2 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
-      <span className="font-bold">⚠️ 2031 Language Check:</span> 
+      <span className="font-bold">⚠️ {year || 'Future'} Language Check:</span> 
       Avoid corporate speak like "{foundJargon.join(', ')}". Be human.
     </div>
   );
 };
 
 export default function StepRenderer({ stepId, data, onChange, onPreview, missingFields = [], showValidation = false }) {
+  const futureYear = useMemo(() => yearFromDate(data?.futureDate), [data?.futureDate]);
   const inputClass = "w-full p-6 glass-panel rounded-3xl outline-none focus:ring-2 focus:ring-teal-500 text-lg transition-all";
   const labelClass = "block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2";
   const isMissing = (key) => missingFields.some(field => field.key === key);
@@ -56,6 +64,12 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
       "",
       `Internal quote (${data.internalSpeaker || "Internal"}): "${data.internalQuote || "—"}"`,
       `External quote (${data.externalSpeaker || "External"}): "${data.externalQuote || "—"}"`,
+
+      "",
+      `Decision to inform: ${data.decisionToInform || "—"}`,
+      `Key risks: ${data.keyRisks || "—"}`,
+      `Kill criteria: ${data.killCriteria || "—"}`,
+      `Next experiment (90d): ${data.nextExperiment || "—"}`,
       "",
       `Confidence: ${typeof data.confidence === 'number' ? data.confidence : "—"}/100`
     ].filter(Boolean);
@@ -122,7 +136,7 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
             {shouldShowMissing('problem') && (
               <p className={errorTextClass}>Describe the current reality.</p>
             )}
-            <JargonWarning text={data.problem} />
+            <JargonWarning text={data.problem} year={futureYear} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -170,7 +184,7 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
              {shouldShowMissing('solution') && (
                <p className={errorTextClass}>Describe the mechanism that changed outcomes.</p>
              )}
-             <JargonWarning text={data.solution} />
+             <JargonWarning text={data.solution} year={futureYear} />
           </div>
 
           <input placeholder="Name of Initiative" value={data.programName} onChange={e => onChange('programName', e.target.value)} className="w-full p-4 glass-panel rounded-2xl outline-none font-bold" />
@@ -249,6 +263,51 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
             Formula: <b className="text-slate-600">Catalyst</b> + <b className="text-slate-600">Active Verb</b> + <b className="text-slate-600">Metric</b> + <b className="text-slate-600">Population</b>. Keep it punchy.
           </div>
 
+          {/* Draft suggestions pulled forward from earlier inputs */}
+          <div className="glass-panel rounded-3xl p-6">
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <div>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Auto-drafts from your inputs</div>
+                <div className="text-xs text-slate-500 mt-1">Click a suggestion to use it (no new claims).</div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {generateHeadlineCandidates(data).slice(0, 5).map((h, idx) => (
+                <button
+                  key={`h-${idx}`}
+                  onClick={() => onChange('headline', h)}
+                  className={`w-full text-left px-4 py-3 rounded-2xl border transition-all ${
+                    (data.headline || '').trim() === h
+                      ? 'bg-teal-50 border-teal-200 text-teal-900'
+                      : 'bg-white/60 border-white/60 hover:bg-white hover:border-teal-200 text-slate-700'
+                  }`}
+                >
+                  <div className="font-bold text-sm leading-snug">{h}</div>
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-5">
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Subheadline options</div>
+              <div className="space-y-2">
+                {generateSubheadlineCandidates(data).slice(0, 3).map((s, idx) => (
+                  <button
+                    key={`s-${idx}`}
+                    onClick={() => onChange('subheadline', s)}
+                    className={`w-full text-left px-4 py-3 rounded-2xl border transition-all ${
+                      (data.subheadline || '').trim() === s
+                        ? 'bg-teal-50 border-teal-200 text-teal-900'
+                        : 'bg-white/60 border-white/60 hover:bg-white hover:border-teal-200 text-slate-700'
+                    }`}
+                  >
+                    <div className="text-sm italic leading-snug">{s}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
           <div>
             <label className={labelClass}>The Press Release Headline</label>
             <textarea value={data.headline} onChange={e => onChange('headline', e.target.value)} placeholder="Catalyst + Verb + Metric + Population" className={`w-full p-8 text-3xl font-serif font-bold glass-panel rounded-[2.5rem] outline-none focus:ring-2 focus:ring-teal-500 leading-tight ${shouldShowMissing('headline') ? errorClass : ''}`} />
@@ -311,6 +370,58 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
             <li className="flex gap-3"><span>•</span><span><b>Align partners:</b> everyone shares the same definition of winning.</span></li>
             <li className="flex gap-3"><span>•</span><span><b>Kill weak strategies:</b> if you can’t write this credibly, you probably can’t fund it credibly.</span></li>
           </ul>
+        </div>
+
+        <div className="glass-panel rounded-3xl p-6 space-y-4">
+          <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Internal decision notes</div>
+          <div className="text-xs text-slate-500">
+            Optional, but useful for turning this press-release draft into a funding/strategy tool.
+          </div>
+
+          <div>
+            <label className={labelClass}>Decision this should inform</label>
+            <textarea
+              value={data.decisionToInform}
+              onChange={e => onChange('decisionToInform', e.target.value)}
+              placeholder="e.g., Fund a 12-month build phase; pause if implementation burden is too high; seek a district distribution partner"
+              className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
+              rows={3}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={labelClass}>Top risks / failure modes</label>
+              <textarea
+                value={data.keyRisks}
+                onChange={e => onChange('keyRisks', e.target.value)}
+                placeholder="3 bullets is enough. What would make the headline untrue?"
+                className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
+                rows={4}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Kill criteria</label>
+              <textarea
+                value={data.killCriteria}
+                onChange={e => onChange('killCriteria', e.target.value)}
+                placeholder="If by [date] we don't see [leading indicator], we stop/pivot…"
+                className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
+                rows={4}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelClass}>Next experiment (90 days)</label>
+            <textarea
+              value={data.nextExperiment}
+              onChange={e => onChange('nextExperiment', e.target.value)}
+              placeholder="Smallest credible test that would update belief (what, where, who, how measured)."
+              className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
+              rows={3}
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

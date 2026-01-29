@@ -4,7 +4,9 @@ import { useStrategyDraft } from './hooks/useStrategyDraft';
 import Sidebar from './components/Layout/Sidebar';
 import StepRenderer from './components/Wizard/StepRenderer';
 import PressReleaseArtifact from './components/Artifact/PressRelease';
+import CoachPanel from './components/Coach/CoachPanel';
 import { STEPS } from './constants/data';
+import { generateHeadlineCandidates, generateSubheadlineCandidates } from './utils/pressReleaseDrafts';
 
 export default function App() {
   const [activeStep, setActiveStep] = useState(0);
@@ -16,6 +18,24 @@ export default function App() {
   } = useStrategyDraft();
 
   const stepId = STEPS[activeStep]?.id;
+
+  // Auto-draft headline/subheadline from earlier inputs when entering the Headline step.
+  // Does NOT overwrite any existing user text.
+  useEffect(() => {
+    if (stepId !== 'headline') return;
+
+    if (!data.headline?.trim()) {
+      const draft = generateHeadlineCandidates(data)?.[0];
+      if (draft) updateField('headline', draft);
+    }
+
+    if (!data.subheadline?.trim()) {
+      const draft = generateSubheadlineCandidates(data)?.[0];
+      if (draft) updateField('subheadline', draft);
+    }
+    // Intentionally run on step entry only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepId]);
 
   const requiredFieldsByStep = useMemo(() => ({
     context: [
@@ -139,6 +159,12 @@ export default function App() {
                 onPreview={() => setShowPreview(true)}
                 missingFields={missingFields}
                 showValidation={showValidation}
+              />
+
+              <CoachPanel
+                stepId={stepId}
+                data={data}
+                missingFields={missingFields}
               />
             </div>
 
