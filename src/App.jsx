@@ -1,21 +1,29 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Save, Share2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Save, ArrowRight, ArrowLeft, FileText } from 'lucide-react';
 import { useStrategyDraft } from './hooks/useStrategyDraft';
 import Sidebar from './components/Layout/Sidebar';
 import StepRenderer from './components/Wizard/StepRenderer';
 import PressReleaseArtifact from './components/Artifact/PressRelease';
 import CoachPanel from './components/Coach/CoachPanel';
+import Toast from './components/UI/Toast';
 import { STEPS } from './constants/data';
 import { generateHeadlineCandidates, generateSubheadlineCandidates } from './utils/pressReleaseDrafts';
+import { supabase } from './services/supabase';
 
 export default function App() {
   const [activeStep, setActiveStep] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
   const [showValidation, setShowValidation] = useState(false);
+  const [mode, setMode] = useState('draft');
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, variant = 'success') => {
+    setToast({ message, variant });
+  };
 
   const { 
     data, updateField, saveStrategy, isSaving, lastSaved 
-  } = useStrategyDraft();
+  } = useStrategyDraft({ onToast: showToast });
 
   const stepId = STEPS[activeStep]?.id;
 
@@ -42,10 +50,14 @@ export default function App() {
       { key: 'futureDate', label: 'Target Success Date' },
       { key: 'location', label: 'Location' }
     ],
+    headline: [
+      { key: 'headline', label: 'Press Release Headline' },
+      { key: 'successMetric', label: 'Success Metric' },
+      { key: 'beneficiary', label: 'Beneficiary' },
+      { key: 'problemScope', label: 'Scope' }
+    ],
     problem: [
       { key: 'problem', label: 'Old Reality' },
-      { key: 'beneficiary', label: 'Beneficiary' },
-      { key: 'problemScope', label: 'Scope' },
       { key: 'denominatorIncluded', label: 'Denominator Included' }
     ],
     solution: [
@@ -54,28 +66,26 @@ export default function App() {
     ],
     evidence: [
       { key: 'evidence', label: 'Undeniable Proof' },
-      { key: 'successMetric', label: 'Success Metric' },
       { key: 'sinatraWhyUndeniable', label: 'Why It’s Undeniable' }
     ],
     stakeholder: [
       { key: 'internalQuote', label: 'Internal Reflection' },
       { key: 'externalQuote', label: 'Beneficiary Voice' }
-    ],
-    headline: [
-      { key: 'headline', label: 'Press Release Headline' }
     ]
   }), []);
 
   const missingFields = useMemo(() => {
     const has = (v) => typeof v === 'string' ? v.trim().length > 0 : v !== null && v !== undefined;
-    return (requiredFieldsByStep[stepId] || [])
+    const required = mode === 'polish'
+      ? (requiredFieldsByStep[stepId] || [])
+      : (stepId === 'headline' ? [{ key: 'headline', label: 'Press Release Headline' }] : []);
+    return required
       .filter(({ key }) => !has(data[key]))
       .map((field) => field);
-  }, [stepId, data, requiredFieldsByStep]);
+  }, [stepId, data, requiredFieldsByStep, mode]);
 
   const canGoNext = useMemo(() => {
-    if (stepId === 'next') return false;
-    if (stepId === 'frame' || stepId === 'review') return true;
+    if (stepId === 'review') return true;
     return missingFields.length === 0;
   }, [stepId, missingFields]);
 
@@ -97,10 +107,11 @@ export default function App() {
     setShowValidation(false);
   }, [activeStep]);
 
-  const copyShareLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    alert("Link copied! Share this future retrospective with your team.");
-  };
+  useEffect(() => {
+    if (!toast) return;
+    const timeout = window.setTimeout(() => setToast(null), 2500);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
 
   return (
     <div className="min-h-screen bg-slate-100 p-4 md:p-8 font-sans text-slate-800 relative bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-teal-50 via-slate-100 to-slate-200">
@@ -110,6 +121,7 @@ export default function App() {
         <PressReleaseArtifact
           data={data}
           onClose={() => setShowPreview(false)}
+          onToast={showToast}
         />
       )}
 
@@ -145,10 +157,15 @@ export default function App() {
                 Saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
+            {!supabase && (
+              <span className="text-xs text-slate-500 mr-2 font-medium">
+                Saved automatically (this browser)
+              </span>
+            )}
             <div className="flex items-center gap-3">
-              {showValidation && missingFields.length > 0 && activeStep < STEPS.length - 1 && (
+              {mode === 'polish' && showValidation && missingFields.length > 0 && activeStep < STEPS.length - 1 && (
                 <div className="text-xs text-teal-700 bg-teal-50/80 border border-teal-100 px-3 py-1.5 rounded-full">
-                  Missing: {missingFields.map(field => field.label).join(', ')}
+                  {missingFields.length} fields missing
                 </div>
               )}
               <button
@@ -159,6 +176,12 @@ export default function App() {
                 <ArrowLeft className="w-4 h-4" /> Previous
               </button>
               <button
+                onClick={() => setShowPreview(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full font-bold text-xs transition-all bg-white hover:bg-slate-50 text-slate-600 shadow-lg hover:shadow-xl"
+              >
+                <FileText className="w-4 h-4" /> Preview
+              </button>
+              <button
                 onClick={handleNext}
                 disabled={nextDisabled}
                 title={!canGoNext ? "Complete the required fields to continue." : ""}
@@ -167,12 +190,32 @@ export default function App() {
                 Next Step <ArrowRight className="w-4 h-4" />
               </button>
             </div>
-            <button onClick={copyShareLink} className="p-3 hover:bg-white/80 rounded-xl transition text-slate-500 hover:text-teal-600" title="Copy Link">
-              <Share2 className="w-5 h-5" />
-            </button>
-            <button onClick={saveStrategy} disabled={isSaving} className="bg-slate-900 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-slate-900/20 hover:shadow-2xl hover:scale-105 transition-all flex items-center gap-2">
-              {isSaving ? "Saving..." : <><Save className="w-4 h-4" /> Save Work</>}
-            </button>
+            <div className="flex items-center gap-2 rounded-full bg-white/70 border border-white/80 p-1">
+              <button
+                onClick={() => setMode('draft')}
+                className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest ${
+                  mode === 'draft' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                Draft
+              </button>
+              <button
+                onClick={() => setMode('polish')}
+                className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest ${
+                  mode === 'polish' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                Polish
+              </button>
+            </div>
+            {supabase && (
+              <div className="flex flex-col items-end gap-1">
+                <button onClick={saveStrategy} disabled={isSaving} className="bg-slate-900 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-slate-900/20 hover:shadow-2xl hover:scale-105 transition-all flex items-center gap-2">
+                  {isSaving ? "Saving..." : <><Save className="w-4 h-4" /> Save Work</>}
+                </button>
+                <span className="text-[10px] text-slate-400">Cloud save stores core press-release fields only.</span>
+              </div>
+            )}
           </div>
         </header>
 
@@ -198,12 +241,16 @@ export default function App() {
                 stepId={stepId}
                 data={data}
                 missingFields={missingFields}
+                mode={mode}
               />
 
             </div>
           </main>
         </div>
       </div>
+      {toast && (
+        <Toast message={toast.message} variant={toast.variant} />
+      )}
     </div>
   );
 }

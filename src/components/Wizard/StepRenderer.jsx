@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
-import { Telescope, Target, Zap, BarChart3, Users, Sparkles, ShieldCheck, FileText, CalendarClock, Copy } from 'lucide-react';
-import { JARGON_LIST } from '../../constants/data';
+import { Telescope, ShieldCheck, FileText, CalendarClock } from 'lucide-react';
+import { ARCHETYPES, JARGON_LIST } from '../../constants/data';
 import { generateHeadlineCandidates, generateSubheadlineCandidates } from '../../utils/pressReleaseDrafts';
+import { headlineLint } from '../../utils/headlineLint';
 
 // Helper for Jargon Warning
 const yearFromDate = (dateStr) => {
@@ -29,52 +30,20 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
   const errorClass = "border border-teal-400/60 ring-1 ring-teal-200/80 focus:ring-teal-400";
   const errorTextClass = "text-xs text-teal-600 mt-2";
   const shouldShowMissing = (key) => showValidation && isMissing(key);
+  const programNameLabel = data?.archetype === 'grant' ? 'Grant / investment name (optional)' : 'Portfolio bet name (optional)';
+  const programNamePlaceholder = data?.archetype === 'grant' ? 'Grant / investment name (optional)' : 'Portfolio bet name (optional)';
+  const scalePlaceholder = data?.archetype === 'grant'
+    ? 'How this scales beyond a single grantee (distribution channel, replication, policy…)'
+    : 'How this scales at system level (policy, procurement, adoption…)';
 
-  const copyToClipboard = async (text, successMsg) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      alert(successMsg || "Copied to clipboard.");
-    } catch {
-      alert("Couldn't copy automatically. Please copy manually.");
-    }
-  };
-
-  const buildArtifactText = () => {
-    const lines = [
-      data.headline ? data.headline.trim() : "",
-      data.subheadline ? data.subheadline.trim() : "",
-      "",
-      `Program: ${data.programName || "—"}`,
-      `Where: ${data.location || "—"}`,
-      `When: ${data.futureDate || "—"}`,
-      "",
-      `Problem (old reality): ${data.problem || "—"}`,
-      `Beneficiary: ${data.beneficiary || "—"}`,
-      `Denominator (included): ${data.denominatorIncluded || "—"}`,
-      `Denominator (excluded): ${data.denominatorExcluded || "—"}`,
-      `Scope: ${data.problemScope || "—"}`,
-      "",
-      `Catalyst: ${data.solution || "—"}`,
-      `Mechanism of scale: ${data.scaleMechanism || "—"}`,
-      "",
-      `Sinatra proof: ${data.evidence || "—"}`,
-      `Success metric: ${data.successMetric || "—"}`,
-      `Who would dispute it: ${data.sinatraSkeptic || "—"}`,
-      `Why they can't: ${data.sinatraWhyUndeniable || "—"}`,
-      "",
-      `Internal quote (${data.internalSpeaker || "Internal"}): "${data.internalQuote || "—"}"`,
-      `External quote (${data.externalSpeaker || "External"}): "${data.externalQuote || "—"}"`,
-
-      "",
-      `Decision to inform: ${data.decisionToInform || "—"}`,
-      `Key risks: ${data.keyRisks || "—"}`,
-      `Kill criteria: ${data.killCriteria || "—"}`,
-      `Next experiment (90d): ${data.nextExperiment || "—"}`,
-      "",
-      `Confidence: ${typeof data.confidence === 'number' ? data.confidence : "—"}/100`
-    ].filter(Boolean);
-    return lines.join('\n');
-  };
+  const headlineLintResult = useMemo(() => headlineLint({
+    headline: data?.headline,
+    successMetric: data?.successMetric,
+    beneficiary: data?.beneficiary,
+    problemScope: data?.problemScope,
+    futureDate: data?.futureDate,
+    location: data?.location
+  }), [data?.headline, data?.successMetric, data?.beneficiary, data?.problemScope, data?.futureDate, data?.location]);
 
   switch (stepId) {
     case 'frame': return (
@@ -83,17 +52,38 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
           <div className="w-16 h-16 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
             <Telescope className="w-8 h-8"/>
           </div>
-          <h3 className="text-2xl font-bold text-slate-800">Write from the Future</h3>
-          <p className="text-slate-500 mt-2">This is not a plan. It’s a press release written after you’ve won.</p>
+          <h3 className="text-2xl font-bold text-slate-800">Setup</h3>
+          <p className="text-slate-500 mt-2">Select the archetype and commit to outcome-first writing.</p>
         </div>
 
-        <div className="glass-panel rounded-3xl p-6 space-y-4">
+        <div className="glass-panel rounded-3xl p-6 space-y-5">
           <div>
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Rules of the game</div>
-            <ul className="mt-3 space-y-2 text-slate-700">
-              <li className="flex gap-3"><span>✅</span><span><b>Concrete only:</b> if it can’t be measured, named, or quoted, it doesn’t count.</span></li>
-              <li className="flex gap-3"><span>✅</span><span><b>Full denominator:</b> define the whole population that must be different by the date.</span></li>
-              <li className="flex gap-3"><span>✅</span><span><b>Inevitable win:</b> by 2031, success should feel obvious—not heroic.</span></li>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Archetype</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+              {ARCHETYPES.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => onChange('archetype', item.id)}
+                  className={`text-left p-4 rounded-2xl border transition-all ${
+                    data?.archetype === item.id
+                      ? 'bg-teal-50 border-teal-200 text-teal-900'
+                      : 'bg-white/60 border-white/60 hover:bg-white hover:border-teal-200 text-slate-700'
+                  }`}
+                >
+                  <div className="font-bold text-sm">{item.label}</div>
+                  <div className="text-xs text-slate-500 mt-1">{item.description}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white/70 rounded-2xl border border-white/60 p-4">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">How to use in 5 minutes</div>
+            <ul className="mt-3 space-y-2 text-sm text-slate-700">
+              <li>1) Set horizon.</li>
+              <li>2) Draft headline + metric + population.</li>
+              <li>3) Preview the artifact.</li>
+              <li className="text-slate-500">Optional: backfill proof, mechanism, and voices.</li>
             </ul>
           </div>
         </div>
@@ -105,8 +95,8 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
            <div className="text-center py-6">
              <div className="w-16 h-16 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner"><CalendarClock className="w-8 h-8"/></div>
-             <h3 className="text-2xl font-bold text-slate-800">Set the Horizon</h3>
-             <p className="text-slate-500 mt-2">We are time traveling to the moment of victory.</p>
+             <h3 className="text-2xl font-bold text-slate-800">Horizon</h3>
+             <p className="text-slate-500 mt-2">Anchor the future moment the board will measure against.</p>
            </div>
            <div>
              <label className={labelClass}>Target Success Date</label>
@@ -138,23 +128,6 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className={labelClass}>Who Suffered?</label>
-              <input placeholder="Beneficiary (e.g. Rural Students)" value={data.beneficiary} onChange={e => onChange('beneficiary', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('beneficiary') ? errorClass : ''}`} />
-              {shouldShowMissing('beneficiary') && (
-                <p className={errorTextClass}>Name who felt the pain.</p>
-              )}
-            </div>
-            <div>
-              <label className={labelClass}>How Many?</label>
-              <input placeholder="Scope (e.g. 2 Million)" value={data.problemScope} onChange={e => onChange('problemScope', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('problemScope') ? errorClass : ''}`} />
-              {shouldShowMissing('problemScope') && (
-                <p className={errorTextClass}>Add the scale or count.</p>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
               <label className={labelClass}>Denominator: Included</label>
               <input placeholder="Who is counted? (e.g. All K–8 rural students in US public schools)" value={data.denominatorIncluded} onChange={e => onChange('denominatorIncluded', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('denominatorIncluded') ? errorClass : ''}`} />
               {shouldShowMissing('denominatorIncluded') && (
@@ -172,7 +145,7 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
     case 'solution': return (
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
           <div className="text-xs text-slate-400 bg-white/60 border border-white/60 rounded-2xl p-4">
-            <b className="text-slate-600">Guardrail:</b> This is <b>not</b> a list of activities or pilots. It’s the <b>single mechanism</b> that made scale unavoidable.
+            <b className="text-slate-600">Guardrail:</b> This is <b>not</b> a list of activities. It’s the <b>single mechanism</b> that made scale unavoidable.
           </div>
 
           <div>
@@ -184,11 +157,17 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
              <JargonWarning text={data.solution} year={futureYear} />
           </div>
 
-          <input placeholder="Name of Initiative" value={data.programName} onChange={e => onChange('programName', e.target.value)} className="w-full p-4 glass-panel rounded-2xl outline-none font-bold" />
-          <input placeholder="Mechanism of Scale (How did it grow?)" value={data.scaleMechanism} onChange={e => onChange('scaleMechanism', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('scaleMechanism') ? errorClass : ''}`} />
-          {shouldShowMissing('scaleMechanism') && (
-            <p className={errorTextClass}>Explain how it scaled.</p>
-          )}
+          <div>
+            <label className={labelClass}>{programNameLabel}</label>
+            <input placeholder={programNamePlaceholder} value={data.programName} onChange={e => onChange('programName', e.target.value)} className="w-full p-4 glass-panel rounded-2xl outline-none font-bold" />
+          </div>
+          <div>
+            <label className={labelClass}>Mechanism of scale</label>
+            <input placeholder={scalePlaceholder} value={data.scaleMechanism} onChange={e => onChange('scaleMechanism', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('scaleMechanism') ? errorClass : ''}`} />
+            {shouldShowMissing('scaleMechanism') && (
+              <p className={errorTextClass}>Explain how it scaled.</p>
+            )}
+          </div>
         </div>
     );
 
@@ -205,11 +184,6 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
                <p className={errorTextClass}>Add the proof point.</p>
              )}
            </div>
-
-           <input placeholder="Headline Success Metric (e.g. 95% Retention)" value={data.successMetric} onChange={e => onChange('successMetric', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none text-teal-700 font-bold ${shouldShowMissing('successMetric') ? errorClass : ''}`} />
-           {shouldShowMissing('successMetric') && (
-             <p className={errorTextClass}>Include the key metric.</p>
-           )}
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              <div>
@@ -256,8 +230,102 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
 
     case 'headline': return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+          <div className="glass-panel rounded-3xl p-6 space-y-4">
+            <div>
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Headline inputs</div>
+              <div className="text-xs text-slate-500 mt-1">These fields drive your headline and reduce redundancy later.</div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Success metric</label>
+                <input
+                  placeholder="e.g., 95% retention"
+                  value={data.successMetric}
+                  onChange={e => onChange('successMetric', e.target.value)}
+                  className={`w-full p-4 glass-panel rounded-2xl outline-none text-teal-700 font-bold ${shouldShowMissing('successMetric') ? errorClass : ''}`}
+                />
+                {shouldShowMissing('successMetric') && (
+                  <p className={errorTextClass}>Include the key metric.</p>
+                )}
+              </div>
+              <div>
+                <label className={labelClass}>Beneficiary</label>
+                <input
+                  placeholder="Who benefits? (e.g., rural students)"
+                  value={data.beneficiary}
+                  onChange={e => onChange('beneficiary', e.target.value)}
+                  className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('beneficiary') ? errorClass : ''}`}
+                />
+                {shouldShowMissing('beneficiary') && (
+                  <p className={errorTextClass}>Name who benefits.</p>
+                )}
+              </div>
+              <div>
+                <label className={labelClass}>Problem scope (optional)</label>
+                <input
+                  placeholder="Scale or count (e.g., 2 million)"
+                  value={data.problemScope}
+                  onChange={e => onChange('problemScope', e.target.value)}
+                  className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('problemScope') ? errorClass : ''}`}
+                />
+                {shouldShowMissing('problemScope') && (
+                  <p className={errorTextClass}>Add the scale or count.</p>
+                )}
+              </div>
+              <div>
+                <label className={labelClass}>{programNameLabel}</label>
+                <input
+                  placeholder={programNamePlaceholder}
+                  value={data.programName}
+                  onChange={e => onChange('programName', e.target.value)}
+                  className="w-full p-4 glass-panel rounded-2xl outline-none font-bold"
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="text-xs text-slate-400 bg-white/60 border border-white/60 rounded-2xl p-4">
-            Formula: <b className="text-slate-600">Catalyst</b> + <b className="text-slate-600">Active Verb</b> + <b className="text-slate-600">Metric</b> + <b className="text-slate-600">Population</b>. Keep it punchy.
+            Formula: <b className="text-slate-600">Outcome</b> + <b className="text-slate-600">Metric</b> + <b className="text-slate-600">Population</b> + <b className="text-slate-600">Date</b>. Keep it board-ready.
+          </div>
+
+          <div className="glass-panel rounded-3xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Headline quality checks</div>
+                <div className="text-xs text-slate-500 mt-1">Avoid process language and surface the outcome.</div>
+              </div>
+            </div>
+            {headlineLintResult.flags.length > 0 ? (
+              <div className="space-y-3">
+                {headlineLintResult.flags.slice(0, 3).map((flag) => (
+                  <div key={flag.id} className="p-3 rounded-2xl bg-amber-50/70 border border-amber-100 text-sm">
+                    <div className="font-bold text-amber-900">{flag.title}</div>
+                    {flag.detail && <div className="text-xs text-amber-800 mt-1">{flag.detail}</div>}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-emerald-700 bg-emerald-50/70 border border-emerald-100 px-3 py-2 rounded-2xl">
+                No obvious headline issues detected.
+              </div>
+            )}
+            {headlineLintResult.rewrites.length > 0 && (
+              <div>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Quick rewrites</div>
+                <div className="space-y-2">
+                  {headlineLintResult.rewrites.slice(0, 3).map((rewrite, idx) => (
+                    <button
+                      key={`${rewrite.label}-${idx}`}
+                      onClick={() => onChange('headline', rewrite.headline)}
+                      className="w-full text-left px-4 py-3 rounded-2xl border bg-white/60 border-white/60 hover:bg-white hover:border-teal-200 text-slate-700"
+                    >
+                      <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{rewrite.label}</div>
+                      <div className="font-bold text-sm leading-snug mt-1">{rewrite.headline}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Draft suggestions pulled forward from earlier inputs */}
@@ -313,6 +381,12 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
             )}
           </div>
           <input placeholder="Subheadline context..." value={data.subheadline} onChange={e => onChange('subheadline', e.target.value)} className="w-full p-4 glass-panel rounded-2xl outline-none italic text-slate-500" />
+
+          <div className="text-center">
+            <button onClick={onPreview} className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold shadow-xl hover:scale-105 transition-all flex items-center gap-3 mx-auto ring-4 ring-slate-100">
+              <FileText className="w-5 h-5" /> Preview press release
+            </button>
+          </div>
         </div>
     );
 
@@ -320,8 +394,8 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
         <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
           <div className="text-center pt-8">
             <div className="inline-block p-6 bg-green-50 rounded-full mb-6 border border-green-100 shadow-xl"><ShieldCheck className="w-12 h-12 text-green-600" /></div>
-            <h3 className="text-3xl font-bold mb-2 text-slate-900">Final Polish</h3>
-            <p className="text-slate-500 mb-2 max-w-md mx-auto">Do a last pass for concreteness and plausibility, then generate the artifact.</p>
+            <h3 className="text-3xl font-bold mb-2 text-slate-900">Finalize</h3>
+            <p className="text-slate-500 mb-2 max-w-md mx-auto">Finalize the artifact, then capture decision notes for board prep.</p>
           </div>
 
           <div className="glass-panel rounded-3xl p-6">
@@ -342,110 +416,65 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
             </p>
           </div>
 
+          <div className="glass-panel rounded-3xl p-6 space-y-4">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Internal decision notes</div>
+            <div className="text-xs text-slate-500">
+              Optional, but useful for turning this press-release draft into a funding or strategy tool.
+            </div>
+
+            <div>
+              <label className={labelClass}>Decision this should inform</label>
+              <textarea
+                value={data.decisionToInform}
+                onChange={e => onChange('decisionToInform', e.target.value)}
+                placeholder="e.g., Fund a 12-month build phase; pause if implementation burden is too high; seek a district distribution partner"
+                className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Top risks / failure modes</label>
+                <textarea
+                  value={data.keyRisks}
+                  onChange={e => onChange('keyRisks', e.target.value)}
+                  placeholder="3 bullets is enough. What would make the headline untrue?"
+                  className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
+                  rows={4}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Kill criteria</label>
+                <textarea
+                  value={data.killCriteria}
+                  onChange={e => onChange('killCriteria', e.target.value)}
+                  placeholder="If by [date] we don't see [leading indicator], we stop/pivot…"
+                  className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
+                  rows={4}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className={labelClass}>Next experiment (90 days)</label>
+              <textarea
+                value={data.nextExperiment}
+                onChange={e => onChange('nextExperiment', e.target.value)}
+                placeholder="Smallest credible test that would update belief (what, where, who, how measured)."
+                className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
+                rows={3}
+              />
+            </div>
+          </div>
+
           <div className="text-center">
             <button onClick={onPreview} className="bg-slate-900 text-white px-10 py-5 rounded-2xl font-bold shadow-xl hover:scale-105 transition-all flex items-center gap-3 mx-auto ring-4 ring-slate-100">
               <FileText className="w-5 h-5" /> View Press Release
             </button>
+            <p className="text-xs text-slate-500 mt-3">Export, copy, or print from the press release preview.</p>
           </div>
         </div>
-    );
-
-    case 'next': return (
-      <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-        <div className="text-center py-6">
-          <div className="w-16 h-16 bg-slate-900 text-teal-300 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-            <FileText className="w-8 h-8"/>
-          </div>
-          <h3 className="text-2xl font-bold text-slate-900">Make it Useful</h3>
-          <p className="text-slate-500 mt-2">Turn the artifact into a decision tool, not a document.</p>
-        </div>
-
-        <div className="glass-panel rounded-3xl p-6 space-y-3">
-          <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Use this output to</div>
-          <ul className="mt-2 space-y-2 text-slate-700">
-            <li className="flex gap-3"><span>•</span><span><b>Pressure-test grants:</b> “Would this plausibly produce this headline?”</span></li>
-            <li className="flex gap-3"><span>•</span><span><b>Align partners:</b> everyone shares the same definition of winning.</span></li>
-            <li className="flex gap-3"><span>•</span><span><b>Kill weak strategies:</b> if you can’t write this credibly, you probably can’t fund it credibly.</span></li>
-          </ul>
-        </div>
-
-        <div className="glass-panel rounded-3xl p-6 space-y-4">
-          <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Internal decision notes</div>
-          <div className="text-xs text-slate-500">
-            Optional, but useful for turning this press-release draft into a funding/strategy tool.
-          </div>
-
-          <div>
-            <label className={labelClass}>Decision this should inform</label>
-            <textarea
-              value={data.decisionToInform}
-              onChange={e => onChange('decisionToInform', e.target.value)}
-              placeholder="e.g., Fund a 12-month build phase; pause if implementation burden is too high; seek a district distribution partner"
-              className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
-              rows={3}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Top risks / failure modes</label>
-              <textarea
-                value={data.keyRisks}
-                onChange={e => onChange('keyRisks', e.target.value)}
-                placeholder="3 bullets is enough. What would make the headline untrue?"
-                className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
-                rows={4}
-              />
-            </div>
-            <div>
-              <label className={labelClass}>Kill criteria</label>
-              <textarea
-                value={data.killCriteria}
-                onChange={e => onChange('killCriteria', e.target.value)}
-                placeholder="If by [date] we don't see [leading indicator], we stop/pivot…"
-                className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
-                rows={4}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className={labelClass}>Next experiment (90 days)</label>
-            <textarea
-              value={data.nextExperiment}
-              onChange={e => onChange('nextExperiment', e.target.value)}
-              placeholder="Smallest credible test that would update belief (what, where, who, how measured)."
-              className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
-              rows={3}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button
-            onClick={() => copyToClipboard(data.headline || "", "Headline copied.")}
-            className="w-full bg-white hover:bg-slate-50 text-slate-700 px-6 py-4 rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
-          >
-            <Copy className="w-4 h-4" /> Copy Headline
-          </button>
-
-          <button
-            onClick={() => copyToClipboard(buildArtifactText(), "Artifact summary copied.")}
-            className="w-full bg-slate-900 text-white px-6 py-4 rounded-2xl font-bold shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
-          >
-            <Copy className="w-4 h-4" /> Copy Full Summary
-          </button>
-        </div>
-
-        <div className="text-center">
-          <button
-            onClick={onPreview}
-            className="text-sm font-bold text-teal-700 hover:text-teal-800 underline underline-offset-4"
-          >
-            View Press Release again
-          </button>
-        </div>
-      </div>
     );
 
     default: return null;
