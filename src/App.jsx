@@ -151,47 +151,51 @@ export default function App() {
           />
 
           <main className="flex-1 overflow-y-auto p-8 md:p-12 relative scroll-smooth">
-            <div className="max-w-3xl mx-auto pb-24">
-              <StepRenderer
-                stepId={STEPS[activeStep].id}
-                data={data}
-                onChange={updateField}
-                onPreview={() => setShowPreview(true)}
-                missingFields={missingFields}
-                showValidation={showValidation}
-              />
+            <div className="max-w-3xl mx-auto">
+              {/* Navigation */}
+              <div className="sticky top-6 z-10">
+                <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/70 bg-white/95 backdrop-blur px-5 py-4 shadow-sm">
+                  <button
+                    onClick={handleBack}
+                    disabled={activeStep === 0}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm transition-all ${activeStep === 0 ? 'opacity-0' : 'bg-white hover:bg-slate-50 text-slate-600 shadow-lg hover:shadow-xl'}`}
+                  >
+                    <ArrowLeft className="w-4 h-4" /> Previous
+                  </button>
 
-              <CoachPanel
-                stepId={stepId}
-                data={data}
-                missingFields={missingFields}
-              />
-            </div>
-
-            {/* Navigation Footer (Floating) */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-white/90 via-white/80 to-transparent flex justify-between items-center max-w-3xl mx-auto w-full pointer-events-none">
-              <button
-                onClick={handleBack}
-                disabled={activeStep === 0}
-                className={`pointer-events-auto flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm transition-all ${activeStep === 0 ? 'opacity-0' : 'bg-white hover:bg-slate-50 text-slate-600 shadow-lg hover:shadow-xl'}`}
-              >
-                <ArrowLeft className="w-4 h-4" /> Previous
-              </button>
-
-              <div className="pointer-events-auto flex flex-col items-end gap-2">
-                {showValidation && missingFields.length > 0 && activeStep < STEPS.length - 1 && (
-                  <div className="text-xs text-teal-700 bg-teal-50/80 border border-teal-100 px-3 py-1.5 rounded-full">
-                    Missing: {missingFields.map(field => field.label).join(', ')}
+                  <div className="flex flex-col items-end gap-2">
+                    {showValidation && missingFields.length > 0 && activeStep < STEPS.length - 1 && (
+                      <div className="text-xs text-teal-700 bg-teal-50/80 border border-teal-100 px-3 py-1.5 rounded-full">
+                        Missing: {missingFields.map(field => field.label).join(', ')}
+                      </div>
+                    )}
+                    <button
+                      onClick={handleNext}
+                      disabled={nextDisabled}
+                      title={!canGoNext ? "Complete the required fields to continue." : ""}
+                      className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold text-sm transition-all shadow-xl hover:shadow-2xl ${activeStep === STEPS.length - 1 ? 'hidden' : 'flex'} ${nextDisabled ? 'bg-slate-400 text-white cursor-not-allowed' : 'bg-slate-900 text-white hover:scale-105'}`}
+                    >
+                      Next Step <ArrowRight className="w-4 h-4" />
+                    </button>
                   </div>
-                )}
-                <button
-                  onClick={handleNext}
-                  disabled={nextDisabled}
-                  title={!canGoNext ? "Complete the required fields to continue." : ""}
-                  className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold text-sm transition-all shadow-xl hover:shadow-2xl ${activeStep === STEPS.length - 1 ? 'hidden' : 'flex'} ${nextDisabled ? 'bg-slate-400 text-white cursor-not-allowed' : 'bg-slate-900 text-white hover:scale-105'}`}
-                >
-                  Next Step <ArrowRight className="w-4 h-4" />
-                </button>
+                </div>
+              </div>
+
+              <div className="pt-8 pb-24">
+                <StepRenderer
+                  stepId={STEPS[activeStep].id}
+                  data={data}
+                  onChange={updateField}
+                  onPreview={() => setShowPreview(true)}
+                  missingFields={missingFields}
+                  showValidation={showValidation}
+                />
+
+                <CoachPanel
+                  stepId={stepId}
+                  data={data}
+                  missingFields={missingFields}
+                />
               </div>
             </div>
           </main>
