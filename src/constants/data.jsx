@@ -7,11 +7,11 @@ export const JARGON_LIST = ['leverage', 'synergy', 'holistic', 'paradigm', 'ecos
 export const STEPS = [
   { id: 'frame', title: 'Setup', icon: <Telescope className="w-5 h-5" /> },
   { id: 'context', title: 'Horizon', icon: <CalendarClock className="w-5 h-5" /> },
-  { id: 'headline', title: 'Headline', icon: <Sparkles className="w-5 h-5" /> },
   { id: 'problem', title: 'Current reality', icon: <Target className="w-5 h-5" /> },
   { id: 'solution', title: 'Mechanism', icon: <Zap className="w-5 h-5" /> }, 
   { id: 'evidence', title: 'Proof', icon: <BarChart3 className="w-5 h-5" /> },
   { id: 'stakeholder', title: 'Voices (optional)', icon: <Users className="w-5 h-5" /> },
+  { id: 'headline', title: 'Headline', icon: <Sparkles className="w-5 h-5" /> },
   { id: 'review', title: 'Finalize', icon: <ShieldCheck className="w-5 h-5" /> }
 ];
 
@@ -52,8 +52,8 @@ export const INITIAL_DATA = {
   sinatraWhyUndeniable: "",
 
   // Human story
-  internalQuote: "", internalSpeaker: "Foundation Leadership",
-  externalQuote: "", externalSpeaker: "Program Partner",
+  internalQuote: "", internalSpeaker: "",
+  externalQuote: "", externalSpeaker: "",
 
   // Final confidence check (0–100)
   confidence: 70,
