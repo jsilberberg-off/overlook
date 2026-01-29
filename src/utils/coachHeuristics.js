@@ -3,6 +3,26 @@ import { JARGON_LIST } from '../constants/data';
 const compact = (s) => (typeof s === 'string' ? s.trim().replace(/\s+/g, ' ') : '');
 const hasText = (s) => compact(s).length > 0;
 const containsNumber = (s) => /\d/.test(compact(s));
+const PROCESS_TERMS = [
+  'launch',
+  'announce',
+  'partner',
+  'partnership',
+  'convene',
+  'coalition',
+  'initiative',
+  'pilot',
+  'rollout',
+  'collaborate',
+  'capacity building',
+  'empower',
+  'support',
+  'strengthen',
+  'invest',
+  'investment',
+  'grant',
+  'funding'
+];
 
 const findJargon = (text) => {
   const t = compact(text).toLowerCase();
@@ -130,6 +150,10 @@ export function getHeuristicCoachFeedback(stepId, data) {
         addWarn('Headline is empty.', 'Use the draft suggestions as a starting point.', 12);
       } else {
         if (h.length > 120) addWarn('Headline is long.', 'Try to keep it under ~120 characters for scannability.', 4);
+        const hasProcess = PROCESS_TERMS.some((term) => h.toLowerCase().includes(term));
+        if (hasProcess && !containsNumber(h)) {
+          addWarn('Headline reads like process, not outcome.', 'Swap activity language for a measurable result.', 6);
+        }
         if (hasText(data?.successMetric) && !h.toLowerCase().includes(compact(data?.successMetric).toLowerCase().slice(0, 10))) {
           addWarn('Headline may not reflect the metric.', 'Consider pulling the headline metric into the headline itself.', 5);
         }

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { INITIAL_DATA } from '../constants/data';
 
-export function useStrategyDraft() {
+export function useStrategyDraft({ onToast } = {}) {
   const [data, setData] = useState(() => {
     const local = localStorage.getItem('overlook_draft');
     return local ? JSON.parse(local) : INITIAL_DATA;
@@ -60,7 +60,7 @@ export function useStrategyDraft() {
 
   const saveStrategy = async () => {
     if (!supabase) {
-      alert("Supabase not configured. Saved to browser storage only.");
+      onToast?.('Supabase not configured. Saved to browser storage only.', 'error');
       return;
     }
     setIsSaving(true);
@@ -82,9 +82,10 @@ export function useStrategyDraft() {
     if (!error && saved?.[0]) {
       setDraftId(saved[0].id);
       setLastSaved(new Date());
+      onToast?.('Saved to cloud.', 'success');
     } else {
        console.error("Save Error", error);
-       alert("Failed to save to cloud.");
+       onToast?.('Failed to save to cloud.', 'error');
     }
     setIsSaving(false);
   };

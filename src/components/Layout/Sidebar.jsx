@@ -6,7 +6,7 @@ export default function Sidebar({ activeStep, setActiveStep }) {
   return (
     <div className="hidden md:flex flex-col w-64 border-r border-white/20 bg-white/30 backdrop-blur-md p-6 overflow-y-auto">
       <div className="mb-8">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Journey Steps</h3>
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Draft steps</h3>
         <div className="space-y-1">
           {STEPS.map((step, idx) => (
             <button

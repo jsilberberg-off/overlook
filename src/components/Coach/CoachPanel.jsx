@@ -9,7 +9,7 @@ function normalizeArray(v) {
   return [String(v)];
 }
 
-export default function CoachPanel({ stepId, data, missingFields = [] }) {
+export default function CoachPanel({ stepId, data, missingFields = [], mode = 'draft' }) {
   const [open, setOpen] = useState(stepId !== 'frame');
   const [ai, setAi] = useState({ loading: false, error: null, result: null });
 
@@ -27,10 +27,26 @@ export default function CoachPanel({ stepId, data, missingFields = [] }) {
     }
   };
 
-  // Don’t show on the final “What Now?” step unless users open it.
-  const show = stepId !== 'next' ? true : open;
-
-  if (!show) return null;
+  if (!open) {
+    return (
+      <div className="mt-10">
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="w-full flex items-center px-5 py-4 rounded-2xl bg-white/60 border border-white/60 shadow-sm hover:shadow-md transition"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-slate-900/90 text-teal-300">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div className="text-left">
+              <div className="font-extrabold text-slate-900">Coach</div>
+              <div className="text-xs text-slate-500">Quality checks + optional AI feedback</div>
+            </div>
+          </div>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="mt-10">
@@ -49,9 +65,8 @@ export default function CoachPanel({ stepId, data, missingFields = [] }) {
         </div>
       </button>
 
-      {open && (
-        <div className="mt-4 glass-panel rounded-3xl p-6 space-y-6">
-          {requiredMissing.length > 0 && (
+      <div className="mt-4 glass-panel rounded-3xl p-6 space-y-6">
+          {mode === 'polish' && requiredMissing.length > 0 && (
             <div className="flex items-start gap-3 p-4 rounded-2xl bg-teal-50/80 border border-teal-100">
               <AlertTriangle className="w-5 h-5 text-teal-700 mt-0.5" />
               <div>
@@ -166,7 +181,6 @@ export default function CoachPanel({ stepId, data, missingFields = [] }) {
             )}
           </div>
         </div>
-      )}
     </div>
   );
 }
