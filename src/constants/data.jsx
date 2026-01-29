@@ -52,8 +52,8 @@ export const INITIAL_DATA = {
   sinatraWhyUndeniable: "",
 
   // Human story
-  internalQuote: "", internalSpeaker: "Foundation Leadership",
-  externalQuote: "", externalSpeaker: "Program Partner",
+  internalQuote: "", internalSpeaker: "",
+  externalQuote: "", externalSpeaker: "",
 
   // Final confidence check (0–100)
   confidence: 70,
