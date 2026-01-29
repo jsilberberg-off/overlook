@@ -3,13 +3,6 @@ import { Sparkles, AlertTriangle, CheckCircle2, RefreshCcw } from 'lucide-react'
 import { getHeuristicCoachFeedback } from '../../utils/coachHeuristics';
 import { fetchAICoachFeedback, isAICoachEnabled } from '../../services/aiCoach';
 
-const badge = (score) => {
-  if (score >= 85) return { label: 'Strong', className: 'bg-emerald-50 text-emerald-700 border-emerald-100' };
-  if (score >= 70) return { label: 'Solid', className: 'bg-teal-50 text-teal-700 border-teal-100' };
-  if (score >= 55) return { label: 'Needs tightening', className: 'bg-amber-50 text-amber-700 border-amber-100' };
-  return { label: 'High risk', className: 'bg-rose-50 text-rose-700 border-rose-100' };
-};
-
 function normalizeArray(v) {
   if (!v) return [];
   if (Array.isArray(v)) return v.filter(Boolean).map(String);
@@ -21,7 +14,6 @@ export default function CoachPanel({ stepId, data, missingFields = [] }) {
   const [ai, setAi] = useState({ loading: false, error: null, result: null });
 
   const heuristic = useMemo(() => getHeuristicCoachFeedback(stepId, data), [stepId, data]);
-  const quality = badge(heuristic.score);
 
   const requiredMissing = useMemo(() => (missingFields || []).map((f) => f.label), [missingFields]);
 
@@ -44,7 +36,7 @@ export default function CoachPanel({ stepId, data, missingFields = [] }) {
     <div className="mt-10">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-5 py-4 rounded-2xl bg-white/60 border border-white/60 shadow-sm hover:shadow-md transition"
+        className="w-full flex items-center px-5 py-4 rounded-2xl bg-white/60 border border-white/60 shadow-sm hover:shadow-md transition"
       >
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-slate-900/90 text-teal-300">
@@ -54,9 +46,6 @@ export default function CoachPanel({ stepId, data, missingFields = [] }) {
             <div className="font-extrabold text-slate-900">Coach</div>
             <div className="text-xs text-slate-500">Quality checks + optional AI feedback</div>
           </div>
-        </div>
-        <div className={`text-xs font-bold px-3 py-1 rounded-full border ${quality.className}`}>
-          {heuristic.score}/100 • {quality.label}
         </div>
       </button>
 
@@ -145,12 +134,6 @@ export default function CoachPanel({ stepId, data, missingFields = [] }) {
 
             {ai.result && (
               <div className="mt-4 space-y-4">
-                {typeof ai.result.score === 'number' && (
-                  <div className="text-xs text-slate-500">
-                    AI score: <span className="font-bold text-slate-800">{ai.result.score}/100</span>
-                  </div>
-                )}
-
                 {normalizeArray(ai.result.improvements).length > 0 && (
                   <div>
                     <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">AI improvements</div>

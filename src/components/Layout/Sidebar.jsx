@@ -1,8 +1,8 @@
 import React from 'react';
-import { STEPS, GOLD_STANDARDS } from '../../constants/data';
-import { Sparkles, CheckCircle, FolderOpen } from 'lucide-react';
+import { STEPS } from '../../constants/data';
+import { CheckCircle } from 'lucide-react';
 
-export default function Sidebar({ activeStep, setActiveStep, onLoadTemplate }) {
+export default function Sidebar({ activeStep, setActiveStep }) {
   return (
     <div className="hidden md:flex flex-col w-64 border-r border-white/20 bg-white/30 backdrop-blur-md p-6 overflow-y-auto">
       <div className="mb-8">
@@ -26,23 +26,6 @@ export default function Sidebar({ activeStep, setActiveStep, onLoadTemplate }) {
         </div>
       </div>
 
-      <div className="mt-auto pt-6 border-t border-slate-200/50">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-          <Sparkles className="w-3 h-3 text-teal-500" /> Inspiration
-        </h3>
-        <div className="grid grid-cols-1 gap-2">
-          {Object.values(GOLD_STANDARDS).map((template) => (
-            <button 
-              key={template.label}
-              onClick={() => onLoadTemplate(template.data)}
-              className="text-left px-4 py-3 bg-white/40 hover:bg-white rounded-xl text-xs font-bold text-slate-600 shadow-sm border border-transparent hover:border-teal-200 transition-all flex items-center gap-2 group"
-            >
-              <FolderOpen className="w-3 h-3 text-slate-400 group-hover:text-teal-500" />
-              {template.label}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
