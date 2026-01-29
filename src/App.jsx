@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Telescope, Save, Share2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Save, Share2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useStrategyDraft } from './hooks/useStrategyDraft';
 import Sidebar from './components/Layout/Sidebar';
 import StepRenderer from './components/Wizard/StepRenderer';
@@ -118,8 +118,20 @@ export default function App() {
         {/* Header */}
         <header className="h-20 px-8 border-b border-white/30 flex justify-between items-center bg-white/40 backdrop-blur-sm z-20 shrink-0">
           <div className="flex items-center gap-4">
-            <div className="bg-slate-900 p-2.5 rounded-xl shadow-lg shadow-teal-900/20">
-              <Telescope className="w-6 h-6 text-teal-400" />
+            <div className="bg-white p-2.5 rounded-xl shadow-lg shadow-slate-900/10 ring-1 ring-slate-200">
+              <svg
+                className="w-6 h-6"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 100 100"
+                role="img"
+                aria-label="OverLook Aperture O"
+              >
+                <path
+                  fill="#0B1F3A"
+                  fillRule="evenodd"
+                  d="M 50 8 A 42 42 0 1 1 50 92 A 42 42 0 1 1 50 8 Z M 71 13.6 C 48.34 32.87 34.34 57.14 29 86.4 C 51.66 67.13 65.66 42.86 71 13.6 Z"
+                />
+              </svg>
             </div>
             <div>
               <h1 className="text-xl font-black text-slate-900 tracking-tight">OverLook</h1>
