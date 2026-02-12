@@ -98,6 +98,9 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
              <h3 className="text-2xl font-bold text-slate-800">Horizon</h3>
              <p className="text-slate-500 mt-2">Anchor the future moment the board will measure against.</p>
            </div>
+           <div className="text-xs text-slate-400 bg-white/60 border border-white/60 rounded-2xl p-4">
+             Before writing the old reality, define who the grantee is and what they are trying to change.
+           </div>
            <div>
              <label className={labelClass}>Target Success Date</label>
              <input type="date" value={data.futureDate} onChange={e => onChange('futureDate', e.target.value)} className={`${inputClass} text-center text-3xl font-serif font-bold ${shouldShowMissing('futureDate') ? errorClass : ''}`} />
@@ -112,11 +115,45 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
                <p className={errorTextClass}>Add the location of success.</p>
              )}
            </div>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div>
+               <label className={labelClass}>Grantee Organization</label>
+               <input
+                 value={data.granteeOrg}
+                 onChange={e => onChange('granteeOrg', e.target.value)}
+                 placeholder="e.g., Brightline Learning Collaborative"
+                 className={`w-full p-4 glass-panel rounded-xl outline-none ${shouldShowMissing('granteeOrg') ? errorClass : ''}`}
+               />
+               {shouldShowMissing('granteeOrg') && (
+                 <p className={errorTextClass}>Name the grantee organization.</p>
+               )}
+             </div>
+             <div>
+               <label className={labelClass}>What They Focus On</label>
+               <input
+                 value={data.granteeFocus}
+                 onChange={e => onChange('granteeFocus', e.target.value)}
+                 placeholder="e.g., improving early literacy in rural districts"
+                 className={`w-full p-4 glass-panel rounded-xl outline-none ${shouldShowMissing('granteeFocus') ? errorClass : ''}`}
+               />
+               {shouldShowMissing('granteeFocus') && (
+                 <p className={errorTextClass}>Describe the core focus area.</p>
+               )}
+             </div>
+           </div>
         </div>
     );
 
     case 'problem': return (
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
+          {(data.granteeOrg || data.granteeFocus) && (
+            <div className="text-xs text-slate-500 bg-white/70 border border-white/60 rounded-2xl p-4">
+              <b className="text-slate-700">Context anchor:</b>{' '}
+              {data.granteeOrg ? <span>{data.granteeOrg}</span> : <span>[Grantee organization]</span>}
+              {' '}focused on{' '}
+              {data.granteeFocus ? <span>{data.granteeFocus}</span> : <span>[focus area]</span>}.
+            </div>
+          )}
           <div>
             <label className={labelClass}>The "Old" Reality (Current State)</label>
             <textarea value={data.problem} onChange={e => onChange('problem', e.target.value)} placeholder="What was the specific friction or failure point?" className={`${inputClass} h-40 ${shouldShowMissing('problem') ? errorClass : ''}`} />

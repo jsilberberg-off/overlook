@@ -48,7 +48,9 @@ export default function App() {
   const requiredFieldsByStep = useMemo(() => ({
     context: [
       { key: 'futureDate', label: 'Target Success Date' },
-      { key: 'location', label: 'Location' }
+      { key: 'location', label: 'Location' },
+      { key: 'granteeOrg', label: 'Grantee Organization' },
+      { key: 'granteeFocus', label: 'Grantee Focus' }
     ],
     headline: [
       { key: 'headline', label: 'Press Release Headline' },

@@ -11,6 +11,8 @@ const buildPressReleaseText = (data) => {
   const archetypeLabel = (ARCHETYPES.find((item) => item.id === data.archetype) || ARCHETYPES[0])?.label;
   const currentYear = new Date().getFullYear();
   const programName = placeholder(data.programName, '[Program name]');
+  const granteeOrg = placeholder(data.granteeOrg, '');
+  const granteeFocus = placeholder(data.granteeFocus, '');
   const location = placeholder(data.location, '[Location]');
   const futureDate = placeholder(data.futureDate, '[Target date]');
   const beneficiary = placeholder(data.beneficiary, '[Beneficiary]');
@@ -27,7 +29,7 @@ const buildPressReleaseText = (data) => {
     data.headline || '[Future Headline Goes Here]',
     data.subheadline || '[Optional subheadline: add scale + mechanism + time window]',
     '',
-    `${location} — ${futureDate} — Today, the Foundation marked the successful conclusion of ${programName}, an initiative that has fundamentally changed the landscape for ${beneficiary}.`,
+    `${location} — ${futureDate} — Today, the Foundation marked the successful conclusion of ${programName}, an initiative that has fundamentally changed the landscape for ${beneficiary}.${granteeOrg ? ` The work was led by ${granteeOrg}${granteeFocus ? `, focused on ${granteeFocus}` : ''}.` : ''}`,
     '',
     internalQuote,
     '',
@@ -47,6 +49,8 @@ export default function PressReleaseArtifact({ data, onClose, onToast }) {
   const archetypeLabel = (ARCHETYPES.find((item) => item.id === data.archetype) || ARCHETYPES[0])?.label;
   const currentYear = new Date().getFullYear();
   const programName = placeholder(data.programName, '[Program name]');
+  const granteeOrg = placeholder(data.granteeOrg, '');
+  const granteeFocus = placeholder(data.granteeFocus, '');
   const location = placeholder(data.location, '[Location]');
   const futureDate = placeholder(data.futureDate, '[Target date]');
   const beneficiary = placeholder(data.beneficiary, '[Beneficiary]');
@@ -168,6 +172,9 @@ export default function PressReleaseArtifact({ data, onClose, onToast }) {
               <p className="lead text-xl leading-relaxed">
                 <strong className="uppercase text-xs tracking-widest mr-2 text-slate-400 font-sans font-bold">{location} — {futureDate} —</strong> 
                 Today, the Foundation marked the successful conclusion of <strong>{programName}</strong>, an initiative that has fundamentally changed the landscape for {beneficiary}.
+                {granteeOrg && (
+                  <> The work was led by <strong>{granteeOrg}</strong>{granteeFocus ? <> and focused on {granteeFocus}</> : null}.</>
+                )}
               </p>
 
               {data.internalQuote && (

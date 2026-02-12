@@ -29,6 +29,8 @@ function mapSupabaseToDraft(draft) {
     evidence: draft.evidence ?? INITIAL_DATA.evidence,
     successMetric: draft.success_metric ?? INITIAL_DATA.successMetric,
     beneficiary: draft.beneficiary ?? INITIAL_DATA.beneficiary,
+    granteeOrg: draft.grantee_org ?? INITIAL_DATA.granteeOrg,
+    granteeFocus: draft.grantee_focus ?? INITIAL_DATA.granteeFocus,
     internalQuote: draft.internal_quote ?? INITIAL_DATA.internalQuote,
     internalSpeaker: draft.internal_speaker ?? INITIAL_DATA.internalSpeaker,
     externalQuote: draft.external_quote ?? INITIAL_DATA.externalQuote,

@@ -36,6 +36,7 @@ export const INITIAL_DATA = {
   programName: "", headline: "", subheadline: "", location: "NEW YORK",
   futureDate: defaultFutureDateIso, problem: "", problemScope: "", solution: "", 
   scaleMechanism: "", evidence: "", successMetric: "", beneficiary: "",
+  granteeOrg: "", granteeFocus: "",
 
   // Decision-grade additions (internal use; optional)
   decisionToInform: "",
