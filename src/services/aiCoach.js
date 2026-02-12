@@ -26,6 +26,7 @@
 // }
 
 const ENDPOINT = import.meta.env.VITE_AI_COACH_ENDPOINT;
+const COACH_KEY = import.meta.env.VITE_AI_COACH_KEY;
 
 export function isAICoachEnabled() {
   return typeof ENDPOINT === 'string' && ENDPOINT.trim().length > 0;
@@ -39,7 +40,8 @@ export async function fetchAICoachFeedback({ stepId, data }) {
   const res = await fetch(ENDPOINT, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...(COACH_KEY ? { 'X-AI-COACH-KEY': COACH_KEY } : {})
     },
     body: JSON.stringify({ stepId, data })
   });

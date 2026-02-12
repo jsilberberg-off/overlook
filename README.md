@@ -1,56 +1,50 @@
-# OverLook — Future Retrospective Lab
+# OverLook - Future Retrospective Lab
 
-OverLook is a lightweight “write from the future” tool for pressure-testing strategies and grant ideas.
+OverLook is a lightweight "write from the future" tool for pressure-testing strategies and grant ideas.
 
-## V2 changes included in this repo
+## Key features
 
-### 1) Auto-drafted headline and subheadline
-When you enter **The Headline Lab**, the app now generates draft headline/subheadline options from earlier inputs (no invented facts).
+1. Auto-drafted headline and subheadline
+- The Headline step generates options from prior inputs.
+- If headline/subheadline are empty, the top draft is auto-filled.
 
-- If your headline/subheadline are empty, the top draft is auto-filled.
-- You can click any suggested headline/subheadline to apply it.
+2. Coach panel
+- Deterministic quality checks (numbers, denominator clarity, scale mechanism, and more).
+- Optional AI feedback through a configurable backend endpoint.
 
-Draft logic lives in:
-- `src/utils/pressReleaseDrafts.js`
+## Environment variables
 
-### 2) Coach panel (quality checks + optional AI)
-Each step now has a **Coach** panel:
-
-- Deterministic “lint” checks (numbers, denominator clarity, scale mechanism, etc.)
-- Optional AI feedback if you configure an endpoint
-
-Heuristic checks live in:
-- `src/utils/coachHeuristics.js`
-
-#### Enable AI feedback
-Set an environment variable:
+Client-side:
 
 ```bash
 VITE_AI_COACH_ENDPOINT=https://your-domain.com/ai-coach
+VITE_AI_COACH_KEY=optional-client-key
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_KEY=...
 ```
 
-Your endpoint should accept:
+Server-side (`api/ai-coach.js`):
 
-```json
-{ "stepId": "problem", "data": { "...": "..." } }
+```bash
+OPENAI_API_KEY=...
+AI_COACH_ALLOWED_ORIGINS=https://your-app-domain.com,http://localhost:5173
+AI_COACH_SHARED_SECRET=optional-server-secret
 ```
 
-And return JSON (recommended shape):
-
-```json
-{
-  "score": 78,
-  "improvements": ["..."],
-  "risks": ["..."]
-}
-```
-
-The client integration is in:
-- `src/services/aiCoach.js`
+Notes:
+- If `AI_COACH_ALLOWED_ORIGINS` is unset, the endpoint allows all origins.
+- If `AI_COACH_SHARED_SECRET` is set, requests must include `X-AI-COACH-KEY`.
 
 ## Development
 
 ```bash
 npm install
 npm run dev
+```
+
+## Build
+
+```bash
+npm run build
+npm run preview
 ```

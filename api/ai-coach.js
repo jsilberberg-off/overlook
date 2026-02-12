@@ -1,15 +1,45 @@
 /* global process */
 // api/ai-coach.js
 
+function getAllowedOrigins() {
+  const raw = process.env.AI_COACH_ALLOWED_ORIGINS || '';
+  return raw
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+function resolveCorsOrigin(req) {
+  const requestOrigin = req.headers.origin || '';
+  const allowedOrigins = getAllowedOrigins();
+  if (allowedOrigins.length === 0) return '*';
+  if (allowedOrigins.includes(requestOrigin)) return requestOrigin;
+  return '';
+}
+
+function isAuthorized(req) {
+  const requiredSecret = process.env.AI_COACH_SHARED_SECRET;
+  if (!requiredSecret) return true;
+  const provided = req.headers['x-ai-coach-key'];
+  return typeof provided === 'string' && provided === requiredSecret;
+}
+
 export default async function handler(req, res) {
-  // --- CORS (safe default for internal tool) ---
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  // --- CORS ---
+  const corsOrigin = resolveCorsOrigin(req);
+  if (!corsOrigin) {
+    return res.status(403).json({ error: 'Origin not allowed' });
+  }
+  res.setHeader("Access-Control-Allow-Origin", corsOrigin);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-AI-COACH-KEY");
 
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Use POST" });
+  }
+  if (!isAuthorized(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   const { stepId, data } = req.body || {};
