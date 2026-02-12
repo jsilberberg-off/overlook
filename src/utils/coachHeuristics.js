@@ -84,6 +84,8 @@ export function getHeuristicCoachFeedback(stepId, data) {
     case 'context': {
       if (!hasText(data?.futureDate)) addWarn('Missing target success date.', 'Pick a concrete date to anchor “winning.”');
       if (!hasText(data?.location)) addWarn('Missing location / context.', 'Leadership will ask “where is this true?”');
+      if (!hasText(data?.granteeOrg)) addWarn('Missing grantee organization.', 'Name the organization delivering this work.');
+      if (!hasText(data?.granteeFocus)) addWarn('Missing grantee focus area.', 'State what the grantee is trying to change.');
       if (futureYear) addSug('Board-friendly framing tip.', `Use “By ${futureYear}…” language for clarity and accountability.`);
       break;
     }
@@ -108,15 +110,20 @@ export function getHeuristicCoachFeedback(stepId, data) {
     case 'solution': {
       if (!hasText(data?.solution)) addWarn('Mechanism of change is empty.', 'Describe the single change that made outcomes move.');
       if (hasText(data?.solution) && compact(data?.solution).split(/\s+/).length < 10) {
-        addWarn('Mechanism is very short.', 'Add 1–2 sentences on how it changes behavior or incentives.', 5);
+        addWarn('Mechanism is very short.', 'Add 1-2 sentences on how it changes behavior or incentives.', 5);
       }
       if (!hasText(data?.scaleMechanism)) {
         addWarn('Mechanism of scale is missing.', 'Name the distribution channel: policy, procurement, partner, platform, etc.', 10);
       }
-      if (!hasText(data?.programName)) addSug('Clarity option.', 'Give the initiative a working name so leadership can refer to it consistently.');
+      if (!hasText(data?.evidence)) {
+        addWarn('Sinatra proof is missing.', 'Name the single result that would convince a skeptic.', 10);
+      } else if (!containsNumber(data?.evidence)) {
+        addWarn('Proof point lacks a number.', 'Specify the measured change (baseline to outcome) or a clear benchmark.', 6);
+      }
+      if (!hasText(data?.sinatraWhyUndeniable)) addWarn("Why it's undeniable is missing.", 'Explain why this result travels beyond one charismatic site.');
+      if (!hasText(data?.sinatraSkeptic)) addSug('Stress-test.', 'Name a real skeptic (researcher, operator, policymaker). It sharpens the claim.');
       break;
     }
-
     case 'evidence': {
       if (!hasText(data?.successMetric)) {
         addWarn('Headline success metric is missing.', 'Without a headline metric, it’s hard to judge whether the strategy is real.', 12);
@@ -188,3 +195,4 @@ export function getHeuristicCoachFeedback(stepId, data) {
 
   return { score, warnings, suggestions };
 }
+

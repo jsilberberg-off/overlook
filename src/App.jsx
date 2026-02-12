@@ -64,11 +64,9 @@ export default function App() {
     ],
     solution: [
       { key: 'solution', label: 'Mechanism of Change' },
-      { key: 'scaleMechanism', label: 'Mechanism of Scale' }
-    ],
-    evidence: [
+      { key: 'scaleMechanism', label: 'Mechanism of Scale' },
       { key: 'evidence', label: 'Undeniable Proof' },
-      { key: 'sinatraWhyUndeniable', label: 'Why It’s Undeniable' }
+      { key: 'sinatraWhyUndeniable', label: "Why It's Undeniable" }
     ],
     stakeholder: [
       { key: 'internalQuote', label: 'Internal Reflection' },
@@ -256,3 +254,5 @@ export default function App() {
     </div>
   );
 }
+
+

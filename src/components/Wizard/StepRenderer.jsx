@@ -182,7 +182,7 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
     case 'solution': return (
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
           <div className="text-xs text-slate-400 bg-white/60 border border-white/60 rounded-2xl p-4">
-            <b className="text-slate-600">Guardrail:</b> This is <b>not</b> a list of activities. It’s the <b>single mechanism</b> that made scale unavoidable.
+            <b className="text-slate-600">Guardrail:</b> This is <b>not</b> a list of activities. It's the <b>single mechanism</b> that made scale unavoidable.
           </div>
 
           <div>
@@ -195,49 +195,40 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
           </div>
 
           <div>
-            <label className={labelClass}>{programNameLabel}</label>
-            <input placeholder={programNamePlaceholder} value={data.programName} onChange={e => onChange('programName', e.target.value)} className="w-full p-4 glass-panel rounded-2xl outline-none font-bold" />
-          </div>
-          <div>
             <label className={labelClass}>Mechanism of scale</label>
             <input placeholder={scalePlaceholder} value={data.scaleMechanism} onChange={e => onChange('scaleMechanism', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('scaleMechanism') ? errorClass : ''}`} />
             {shouldShowMissing('scaleMechanism') && (
               <p className={errorTextClass}>Explain how it scaled.</p>
             )}
           </div>
-        </div>
-    );
 
-    case 'evidence': return (
-        <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
-           <div className="text-xs text-slate-400 bg-white/60 border border-white/60 rounded-2xl p-4">
+          <div className="text-xs text-slate-400 bg-white/60 border border-white/60 rounded-2xl p-4">
              <b className="text-slate-600">Sinatra Test:</b> If this one result disappeared, no serious observer would believe the solution worked nationally.
-           </div>
+          </div>
 
-           <div>
+          <div>
              <label className={labelClass}>The Undeniable Proof</label>
              <textarea value={data.evidence} onChange={e => onChange('evidence', e.target.value)} placeholder="What data point proved the skeptics wrong?" className={`${inputClass} h-40 ${shouldShowMissing('evidence') ? errorClass : ''}`} />
              {shouldShowMissing('evidence') && (
                <p className={errorTextClass}>Add the proof point.</p>
              )}
-           </div>
+          </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              <div>
                <label className={labelClass}>Who would dispute this?</label>
                <input placeholder="Skeptic (e.g. State superintendent; union; researchers)" value={data.sinatraSkeptic} onChange={e => onChange('sinatraSkeptic', e.target.value)} className="w-full p-4 glass-panel rounded-2xl outline-none" />
              </div>
              <div>
-               <label className={labelClass}>Why can’t they?</label>
+               <label className={labelClass}>Why can't they?</label>
                <input placeholder="What makes it portable / undeniable?" value={data.sinatraWhyUndeniable} onChange={e => onChange('sinatraWhyUndeniable', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('sinatraWhyUndeniable') ? errorClass : ''}`} />
                {shouldShowMissing('sinatraWhyUndeniable') && (
-                 <p className={errorTextClass}>Clarify why it can’t be disputed.</p>
+                 <p className={errorTextClass}>Clarify why it can't be disputed.</p>
                )}
              </div>
            </div>
         </div>
     );
-
     case 'stakeholder': return (
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
           <div className="text-xs text-slate-400 bg-white/60 border border-white/60 rounded-2xl p-4">
@@ -517,3 +508,4 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
     default: return null;
   }
 }
+
