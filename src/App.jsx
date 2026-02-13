@@ -55,16 +55,24 @@ export default function App() {
     headline: [
       { key: 'headline', label: 'Press Release Headline' },
       { key: 'successMetric', label: 'Success Metric' },
+      { key: 'baselineMetric', label: 'Baseline Metric' },
+      { key: 'comparatorMetric', label: 'Comparator Metric' },
+      { key: 'metricTimeframe', label: 'Metric Timeframe' },
       { key: 'beneficiary', label: 'Beneficiary' },
       { key: 'problemScope', label: 'Scope' }
     ],
     problem: [
       { key: 'problem', label: 'Old Reality' },
-      { key: 'denominatorIncluded', label: 'Denominator Included' }
+      { key: 'denominatorIncluded', label: 'Denominator Included' },
+      { key: 'denominatorUnit', label: 'Denominator Unit' },
+      { key: 'denominatorSource', label: 'Denominator Source' }
     ],
     solution: [
       { key: 'solution', label: 'Mechanism of Change' },
       { key: 'scaleMechanism', label: 'Mechanism of Scale' },
+      { key: 'evidenceSummary', label: 'Evidence Summary' },
+      { key: 'evidenceStrength', label: 'Evidence Strength' },
+      { key: 'keyUncertainties', label: 'Key Uncertainties' },
       { key: 'evidence', label: 'Undeniable Proof' },
       { key: 'sinatraWhyUndeniable', label: "Why It's Undeniable" }
     ],
@@ -213,7 +221,7 @@ export default function App() {
                 <button onClick={saveStrategy} disabled={isSaving} className="bg-slate-900 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-slate-900/20 hover:shadow-2xl hover:scale-105 transition-all flex items-center gap-2">
                   {isSaving ? "Saving..." : <><Save className="w-4 h-4" /> Save Work</>}
                 </button>
-                <span className="text-[10px] text-slate-400">Cloud save stores core press-release fields only.</span>
+                <span className="text-[10px] text-slate-400">Cloud save includes rigor fields, assumptions, and decision notes.</span>
               </div>
             )}
           </div>

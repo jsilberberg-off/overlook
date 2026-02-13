@@ -1,13 +1,9 @@
-// Lightweight, deterministic draft generators.
-//
-// Design goals:
-// - Uses only existing user inputs (no invented facts)
-// - Produces multiple candidates so the user can choose
-// - Stays readable for internal leadership/board audiences
+// Deterministic draft generators.
+// Uses only user-provided inputs and prioritizes concise, scannable headlines.
 
 const compact = (s) => (typeof s === 'string' ? s.trim().replace(/\s+/g, ' ') : '');
-
 const hasText = (s) => compact(s).length > 0;
+const joinNonEmpty = (parts, sep = ' ') => parts.map(compact).filter(Boolean).join(sep);
 
 const pickYear = (futureDate) => {
   const d = compact(futureDate);
@@ -16,74 +12,77 @@ const pickYear = (futureDate) => {
   return Number.isFinite(year) ? String(year) : '';
 };
 
-const shorten = (text, max = 70) => {
-  const t = compact(text);
-  if (t.length <= max) return t;
-  return `${t.slice(0, max - 1).trim()}…`;
+const trimToWords = (text, maxWords = 20) => {
+  const words = compact(text).split(' ').filter(Boolean);
+  if (words.length <= maxWords) return words.join(' ');
+  return `${words.slice(0, maxWords).join(' ')}...`;
 };
 
-const joinNonEmpty = (parts, sep = ' ') => parts.map(compact).filter(Boolean).join(sep);
+const deDupe = (items) => {
+  const seen = new Set();
+  return items
+    .map((item) => compact(item))
+    .filter((item) => {
+      if (!item) return false;
+      const key = item.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+};
 
-/**
- * Returns headline candidates ordered from most complete to least.
- */
 export function generateHeadlineCandidates(data) {
-  const programName = compact(data?.programName) || 'New foundation-backed initiative';
   const successMetric = compact(data?.successMetric);
-  const beneficiary = compact(data?.beneficiary) || 'learners';
-  const location = compact(data?.location);
+  const baselineMetric = compact(data?.baselineMetric);
+  const comparatorMetric = compact(data?.comparatorMetric);
+  const metricTimeframe = compact(data?.metricTimeframe);
+  const beneficiary = compact(data?.beneficiary) || 'students';
   const scope = compact(data?.problemScope);
   const year = pickYear(data?.futureDate);
-  const catalyst = shorten(compact(data?.solution), 60);
-
-  const pop = scope ? joinNonEmpty([scope, beneficiary]) : beneficiary;
+  const location = compact(data?.location);
+  const subject = scope ? joinNonEmpty([scope, beneficiary]) : beneficiary;
   const where = location ? `in ${location}` : '';
   const by = year ? `by ${year}` : '';
 
   const candidates = [];
 
   if (hasText(successMetric)) {
-    candidates.push(joinNonEmpty([programName, 'delivers', successMetric, 'for', pop, where]));
-    candidates.push(joinNonEmpty([successMetric, 'for', pop, where, by]));
-    candidates.push(joinNonEmpty([programName, 'achieves', successMetric, 'for', beneficiary, by]));
+    candidates.push(joinNonEmpty([successMetric, 'for', subject, by, where]));
+    candidates.push(joinNonEmpty([subject, 'reach', successMetric, by, where]));
+    if (year) candidates.push(joinNonEmpty(['By', year, subject, 'reach', successMetric, where]));
   }
 
-  if (hasText(catalyst) && hasText(successMetric)) {
-    candidates.push(joinNonEmpty([catalyst, 'drives', successMetric, 'for', pop]));
+  if (!hasText(successMetric)) {
+    candidates.push(joinNonEmpty([subject, 'improve reading outcomes', by, where]));
   }
 
-  // Fallbacks when metric isn't yet defined
-  candidates.push(joinNonEmpty([programName, 'improves outcomes for', pop, where, by]));
-  if (hasText(catalyst)) {
-    candidates.push(joinNonEmpty([programName, 'scales', catalyst, 'for', pop]));
+  if (hasText(successMetric) && hasText(baselineMetric)) {
+    candidates.push(joinNonEmpty([subject, 'move from', baselineMetric, 'to', successMetric, by]));
   }
 
-  // De-dupe while preserving order
-  const seen = new Set();
-  return candidates
-    .map((c) => c.replace(/\s+/g, ' ').trim())
-    .filter((c) => {
-      if (!c) return false;
-      const key = c.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+  if (hasText(successMetric) && hasText(baselineMetric) && hasText(metricTimeframe)) {
+    candidates.push(joinNonEmpty([subject, 'move from', baselineMetric, 'to', successMetric, 'in', metricTimeframe, where]));
+  }
+
+  if (hasText(successMetric) && hasText(comparatorMetric)) {
+    candidates.push(joinNonEmpty([subject, 'reach', successMetric, 'vs', comparatorMetric, by, where]));
+  }
+
+  return deDupe(candidates).map((c) => trimToWords(c, 20));
 }
 
-/**
- * Returns subheadline candidates ordered from most complete to least.
- */
 export function generateSubheadlineCandidates(data) {
-  const programName = compact(data?.programName) || 'the initiative';
+  const programName = compact(data?.programName) || 'the grant';
   const successMetric = compact(data?.successMetric);
-  const beneficiary = compact(data?.beneficiary) || 'learners';
+  const beneficiary = compact(data?.beneficiary) || 'students';
   const location = compact(data?.location);
   const scope = compact(data?.problemScope);
   const year = pickYear(data?.futureDate);
-  const scale = shorten(compact(data?.scaleMechanism), 80);
-  const proof = shorten(compact(data?.evidence), 80);
-
+  const scale = compact(data?.scaleMechanism);
+  const evidence = compact(data?.evidenceSummary || data?.evidence);
+  const uncertainties = compact(data?.keyUncertainties);
+  const evidenceStrength = compact(data?.evidenceStrength);
+  const costPerOutcome = compact(data?.costPerOutcome);
   const pop = scope ? joinNonEmpty([scope, beneficiary]) : beneficiary;
   const where = location ? `in ${location}` : '';
   const by = year ? `by ${year}` : '';
@@ -91,28 +90,32 @@ export function generateSubheadlineCandidates(data) {
   const candidates = [];
 
   if (hasText(scale) && hasText(successMetric)) {
-    candidates.push(joinNonEmpty(['Scaled through', scale + ',', programName, 'reached', pop, where, 'and delivered', successMetric, by], ' '));
+    candidates.push(
+      joinNonEmpty([programName, 'scaled through', scale + ',', 'helping', pop, where, 'reach', successMetric, by])
+    );
   }
 
   if (hasText(successMetric)) {
-    candidates.push(joinNonEmpty([programName, 'delivered', successMetric, 'for', pop, where, by]));
+    candidates.push(joinNonEmpty([programName, 'aims for', successMetric, 'for', pop, where, by]));
   }
 
-  if (hasText(proof) && hasText(successMetric)) {
-    candidates.push(joinNonEmpty(['Proof point:', proof + '.', 'Headline metric:', successMetric + '.']));
+  if (hasText(evidence)) {
+    candidates.push(joinNonEmpty(['Evidence to date:', evidence]));
   }
 
-  // Fallback
-  candidates.push(joinNonEmpty([programName, 'clarified what “winning” looks like for', pop, where, by]));
+  if (hasText(evidenceStrength) && evidenceStrength !== 'none') {
+    candidates.push(joinNonEmpty(['Evidence base:', evidenceStrength.replace(/_/g, ' ')]));
+  }
 
-  const seen = new Set();
-  return candidates
-    .map((c) => c.replace(/\s+/g, ' ').trim())
-    .filter((c) => {
-      if (!c) return false;
-      const key = c.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+  if (hasText(uncertainties)) {
+    candidates.push(joinNonEmpty(['Open uncertainties remain:', uncertainties]));
+  }
+
+  if (hasText(costPerOutcome)) {
+    candidates.push(joinNonEmpty(['Estimated cost per outcome:', costPerOutcome]));
+  }
+
+  candidates.push(joinNonEmpty([programName, 'clarifies what winning looks like for', pop, where, by]));
+
+  return deDupe(candidates).map((c) => trimToWords(c, 28));
 }

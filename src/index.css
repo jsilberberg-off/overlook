@@ -2,10 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --text-base-size: 16px;
+}
+
 @layer base {
   /* Set the default font for the whole app here */
   body {
     @apply font-sans text-slate-800 bg-slate-100;
+    font-size: var(--text-base-size);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -114,4 +122,21 @@
     height: auto;
     border-radius: 0;
   }
+}
+
+body.artifact-open {
+  overflow: hidden;
+}
+
+.artifact-scroll {
+  scrollbar-gutter: stable;
+}
+
+.artifact-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.artifact-scroll::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.45);
+  border-radius: 9999px;
 }

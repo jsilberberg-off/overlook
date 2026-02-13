@@ -31,6 +31,17 @@ export const INITIAL_DATA = {
   futureDate: defaultFutureDateIso, problem: "", problemScope: "", solution: "", 
   scaleMechanism: "", evidence: "", successMetric: "", beneficiary: "",
   granteeOrg: "", granteeFocus: "",
+  evidenceSummary: "",
+  evidenceStrength: "none",
+  keyUncertainties: "",
+  evidenceSources: "",
+  effectRange: "",
+  denominatorUnit: "",
+  denominatorSource: "",
+  baselineMetric: "",
+  comparatorMetric: "",
+  metricTimeframe: "",
+  costPerOutcome: "",
 
   // Decision-grade additions (internal use; optional)
   decisionToInform: "",

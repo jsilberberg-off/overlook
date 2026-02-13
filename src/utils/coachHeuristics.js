@@ -3,6 +3,7 @@ import { JARGON_LIST } from '../constants/data';
 const compact = (s) => (typeof s === 'string' ? s.trim().replace(/\s+/g, ' ') : '');
 const hasText = (s) => compact(s).length > 0;
 const containsNumber = (s) => /\d/.test(compact(s));
+
 const PROCESS_TERMS = [
   'launch',
   'announce',
@@ -37,24 +38,10 @@ const yearFromDate = (dateStr) => {
   return Number.isFinite(year) ? String(year) : '';
 };
 
-/**
- * Returns deterministic, step-aware feedback that does NOT invent facts.
- *
- * Shape:
- * {
- *   score: number (0-100),
- *   warnings: Array<{ title: string, detail?: string }>,
- *   suggestions: Array<{ title: string, detail?: string }>
- * }
- */
 export function getHeuristicCoachFeedback(stepId, data) {
   const warnings = [];
   const suggestions = [];
-
-  // Baseline score starts high; subtract for clarity/credibility issues.
   let score = 100;
-
-  const futureYear = yearFromDate(data?.futureDate);
 
   const addWarn = (title, detail, penalty = 6) => {
     warnings.push({ title, detail });
@@ -65,119 +52,136 @@ export function getHeuristicCoachFeedback(stepId, data) {
     suggestions.push({ title, detail });
   };
 
-  // Global checks (apply to most steps)
   const jargonHits = [
     ...findJargon(data?.problem),
     ...findJargon(data?.solution),
     ...findJargon(data?.scaleMechanism),
-    ...findJargon(data?.evidence)
+    ...findJargon(data?.evidence),
+    ...findJargon(data?.evidenceSummary)
   ];
+
   if (jargonHits.length > 0) {
     addWarn(
-      'Some language reads like corporate jargon.',
+      'Some language reads as jargon.',
       `Consider replacing: ${Array.from(new Set(jargonHits)).slice(0, 6).join(', ')}`,
       4
     );
   }
 
+  const futureYear = yearFromDate(data?.futureDate);
+
   switch (stepId) {
     case 'context': {
-      if (!hasText(data?.futureDate)) addWarn('Missing target success date.', 'Pick a concrete date to anchor “winning.”');
-      if (!hasText(data?.location)) addWarn('Missing location / context.', 'Leadership will ask “where is this true?”');
-      if (!hasText(data?.granteeOrg)) addWarn('Missing grantee organization.', 'Name the organization delivering this work.');
-      if (!hasText(data?.granteeFocus)) addWarn('Missing grantee focus area.', 'State what the grantee is trying to change.');
-      if (futureYear) addSug('Board-friendly framing tip.', `Use “By ${futureYear}…” language for clarity and accountability.`);
+      if (!hasText(data?.futureDate)) addWarn('Missing target success date.', 'Pick a concrete date to anchor the strategy.');
+      if (!hasText(data?.location)) addWarn('Missing location.', 'Leadership will ask where this is true.');
+      if (!hasText(data?.granteeOrg)) addWarn('Missing grantee organization.', 'Name who is delivering this work.');
+      if (!hasText(data?.granteeFocus)) addWarn('Missing grantee focus area.', 'State what they are trying to change.');
+      if (futureYear) addSug('Board framing tip.', `Use "By ${futureYear}..." language for accountability.`);
       break;
     }
 
     case 'problem': {
-      if (!hasText(data?.problem)) addWarn('The “old reality” is empty.', 'State the friction clearly and concretely.');
+      if (!hasText(data?.problem)) addWarn('Current reality is empty.', 'State the friction clearly and concretely.');
       if (hasText(data?.problem) && !containsNumber(data?.problem)) {
-        addWarn('Problem statement lacks a number.', 'Consider adding a baseline rate, gap, or count (even approximate).', 8);
+        addWarn('Current reality lacks a number.', 'Add a baseline rate, gap, or count.', 8);
       }
-      if (!hasText(data?.beneficiary)) addWarn('Beneficiary is unclear.', 'Name who experiences the problem (segment + setting).');
-      if (!hasText(data?.problemScope)) addWarn('Scope is missing.', 'Board audiences tend to anchor on scale (how many / how big).');
+      if (!hasText(data?.beneficiary)) addWarn('Beneficiary is unclear.', 'Name who experiences the problem.');
+      if (!hasText(data?.problemScope)) addWarn('Scope is missing.', 'Board audiences need scale.');
       if (hasText(data?.problemScope) && !containsNumber(data?.problemScope)) {
-        addWarn('Scope field does not include a number.', 'Use a number + unit (e.g., “120 schools”, “45K students”).', 6);
+        addWarn('Scope field does not include a number.', 'Use a number plus unit (for example, 120 schools).', 6);
       }
       if (!hasText(data?.denominatorIncluded)) {
-        addWarn('Denominator is missing.', 'Define the full population that must be different by the success date.', 10);
+        addWarn('Denominator is missing.', 'Define the full population that must be different.', 10);
       }
-      addSug('Credibility tip.', 'Write the denominator in “All X in Y” form. It reduces ambiguity.');
+      if (!hasText(data?.denominatorUnit)) {
+        addWarn('Denominator unit is missing.', 'Specify units such as students, teachers, or schools.', 8);
+      }
+      if (!hasText(data?.denominatorSource)) {
+        addWarn('Denominator source is missing.', 'Cite where the denominator estimate comes from.', 8);
+      }
+      addSug('Credibility tip.', 'Use "All X in Y" wording for denominator clarity.');
       break;
     }
 
     case 'solution': {
       if (!hasText(data?.solution)) addWarn('Mechanism of change is empty.', 'Describe the single change that made outcomes move.');
       if (hasText(data?.solution) && compact(data?.solution).split(/\s+/).length < 10) {
-        addWarn('Mechanism is very short.', 'Add 1-2 sentences on how it changes behavior or incentives.', 5);
+        addWarn('Mechanism is very short.', 'Add how this changes behavior or incentives.', 5);
       }
       if (!hasText(data?.scaleMechanism)) {
-        addWarn('Mechanism of scale is missing.', 'Name the distribution channel: policy, procurement, partner, platform, etc.', 10);
+        addWarn('Mechanism of scale is missing.', 'Name the distribution path: policy, partner, procurement, or platform.', 10);
+      }
+      if (!hasText(data?.evidenceSummary)) {
+        addWarn('Evidence summary is missing.', 'Summarize the strongest evidence and sample context.', 10);
+      }
+      if (!hasText(data?.evidenceStrength) || data?.evidenceStrength === 'none') {
+        addWarn('Evidence strength is not selected.', 'Classify evidence type for decision confidence.', 8);
+      }
+      if (!hasText(data?.keyUncertainties)) {
+        addWarn('Key uncertainties are missing.', 'List what could break transferability or confidence.', 8);
       }
       if (!hasText(data?.evidence)) {
-        addWarn('Sinatra proof is missing.', 'Name the single result that would convince a skeptic.', 10);
+        addWarn('Undeniable proof is missing.', 'Name the single result that would convince a skeptic.', 10);
       } else if (!containsNumber(data?.evidence)) {
-        addWarn('Proof point lacks a number.', 'Specify the measured change (baseline to outcome) or a clear benchmark.', 6);
+        addWarn('Proof point lacks a number.', 'Specify measured change or benchmark.', 6);
       }
-      if (!hasText(data?.sinatraWhyUndeniable)) addWarn("Why it's undeniable is missing.", 'Explain why this result travels beyond one charismatic site.');
-      if (!hasText(data?.sinatraSkeptic)) addSug('Stress-test.', 'Name a real skeptic (researcher, operator, policymaker). It sharpens the claim.');
-      break;
-    }
-    case 'evidence': {
-      if (!hasText(data?.successMetric)) {
-        addWarn('Headline success metric is missing.', 'Without a headline metric, it’s hard to judge whether the strategy is real.', 12);
-      } else if (!containsNumber(data?.successMetric)) {
-        addWarn('Success metric does not include a number.', 'Board audiences need an explicit threshold (%, points, dollars, etc.).', 8);
+      if (!hasText(data?.sinatraWhyUndeniable)) {
+        addWarn('Why this is undeniable is missing.', 'Explain why this result travels beyond one site.');
       }
-      if (!hasText(data?.evidence)) {
-        addWarn('Sinatra proof is missing.', 'Name the single result that would convince a skeptic.', 10);
-      } else if (!containsNumber(data?.evidence)) {
-        addWarn('Proof point lacks a number.', 'Specify the measured change (baseline → outcome) or a clear benchmark.', 6);
-      }
-      if (!hasText(data?.sinatraWhyUndeniable)) addWarn('“Why it’s undeniable” is missing.', 'Explain why this result travels beyond one charismatic site.');
-      if (!hasText(data?.sinatraSkeptic)) addSug('Stress-test.', 'Name a real skeptic (researcher, operator, policymaker). It sharpens the claim.');
       break;
     }
 
     case 'stakeholder': {
-      if (!hasText(data?.internalQuote)) addWarn('Internal quote is missing.', 'Leadership voice should connect results to strategy and inevitability.');
-      if (!hasText(data?.externalQuote)) addWarn('Beneficiary quote is missing.', 'A concrete lived example makes the narrative believable.');
+      if (!hasText(data?.internalQuote)) addWarn('Internal quote is missing.', 'Connect results to strategy and inevitability.');
+      if (!hasText(data?.externalQuote)) addWarn('Beneficiary quote is missing.', 'Add a lived before and after signal.');
       if (hasText(data?.externalQuote) && compact(data?.externalQuote).split(/\s+/).length < 10) {
-        addWarn('Beneficiary quote is very short.', 'Add a “before → after” detail (what changed, when, how it felt).', 4);
+        addWarn('Beneficiary quote is very short.', 'Add a specific before-to-after detail.', 4);
       }
-      addSug('Tone check.', 'Avoid generic praise; quotes should contain a specific change or trade-off.');
+      addSug('Tone check.', 'Avoid generic praise; include a specific observed change.');
       break;
     }
 
     case 'headline': {
       const h = compact(data?.headline);
-      const s = compact(data?.subheadline);
+      const successMetric = compact(data?.successMetric);
+      const beneficiary = compact(data?.beneficiary);
+      const baselineMetric = compact(data?.baselineMetric);
+      const comparatorMetric = compact(data?.comparatorMetric);
+      const metricTimeframe = compact(data?.metricTimeframe);
+
       if (!h) {
-        addWarn('Headline is empty.', 'Use the draft suggestions as a starting point.', 12);
+        addWarn('Headline is empty.', 'Use the generated options as a starting point.', 12);
       } else {
-        if (h.length > 120) addWarn('Headline is long.', 'Try to keep it under ~120 characters for scannability.', 4);
+        if (h.length > 120) addWarn('Headline is long.', 'Aim for under 120 characters.', 4);
+        if (h.split(/\s+/).length > 20) addWarn('Headline is wordy.', 'Aim for 10-20 words.', 4);
         const hasProcess = PROCESS_TERMS.some((term) => h.toLowerCase().includes(term));
         if (hasProcess && !containsNumber(h)) {
-          addWarn('Headline reads like process, not outcome.', 'Swap activity language for a measurable result.', 6);
-        }
-        if (hasText(data?.successMetric) && !h.toLowerCase().includes(compact(data?.successMetric).toLowerCase().slice(0, 10))) {
-          addWarn('Headline may not reflect the metric.', 'Consider pulling the headline metric into the headline itself.', 5);
-        }
-        if (hasText(data?.beneficiary) && !h.toLowerCase().includes(compact(data?.beneficiary).toLowerCase().split(' ')[0])) {
-          addWarn('Headline may not name the population.', 'Board audiences need to know “for whom” at a glance.', 4);
+          addWarn('Headline reads like process, not outcome.', 'Replace activity language with a measurable result.', 6);
         }
       }
-      if (!s) addSug('Subheadline option.', 'Use the subheadline to add scale + mechanism + time window (without adding new claims).');
+
+      if (!hasText(successMetric)) {
+        addWarn('Success metric is missing.', 'Include a measurable threshold.', 10);
+      } else if (!containsNumber(successMetric)) {
+        addWarn('Success metric lacks a number.', 'Add explicit magnitude (percent, points, dollars).', 8);
+      }
+
+      if (!hasText(baselineMetric)) addWarn('Baseline metric is missing.', 'State where the population starts.', 8);
+      if (!hasText(comparatorMetric)) addWarn('Comparator metric is missing.', 'State compared to what.', 8);
+      if (!hasText(metricTimeframe)) addWarn('Metric timeframe is missing.', 'State when this outcome should hold.', 8);
+      if (!hasText(beneficiary)) addWarn('Beneficiary is missing.', 'Name who benefits at a glance.', 6);
+
+      addSug('Drafting tip.', 'A strong pattern is: metric + population + date + location.');
       break;
     }
 
     case 'review': {
-      // A lightweight overall check.
-      if (!hasText(data?.denominatorIncluded)) addWarn('Denominator is still missing.', 'This is a common source of downstream confusion.', 10);
-      if (!hasText(data?.scaleMechanism)) addWarn('Scale mechanism is still missing.', 'Board will ask “how does this move beyond pilots?”', 10);
-      if (!hasText(data?.successMetric)) addWarn('Success metric is still missing.', 'The strategy will be hard to judge without it.', 12);
-      addSug('Decision-use tip.', 'Add “what we would do next if this is true” to keep the artifact strategy-relevant.');
+      if (!hasText(data?.denominatorIncluded)) addWarn('Denominator is missing.', 'Common source of decision confusion.', 10);
+      if (!hasText(data?.scaleMechanism)) addWarn('Scale mechanism is missing.', 'Board will ask how this moves beyond pilots.', 10);
+      if (!hasText(data?.successMetric)) addWarn('Success metric is missing.', 'Without it, strategy quality is hard to judge.', 12);
+      if (!hasText(data?.decisionToInform)) addSug('Decision-use boost.', 'Specify the funding or strategy decision this should inform.');
+      if (!hasText(data?.keyRisks)) addSug('Risk clarity.', 'Add top risks or failure modes to improve realism.');
+      if (!hasText(data?.killCriteria)) addSug('Discipline check.', 'Add kill criteria for faster course correction.');
       break;
     }
 
@@ -185,14 +189,10 @@ export function getHeuristicCoachFeedback(stepId, data) {
       break;
   }
 
-  // Keep score in a helpful band.
   score = Math.max(0, Math.min(100, score));
-
-  // If very few warnings, add a “next level” suggestion.
   if (warnings.length <= 1) {
-    addSug('Make it decision-grade.', 'Add one constraint: cost, implementation burden, or a “kill criteria” checkpoint.');
+    addSug('Make it decision-grade.', 'Add a cost or implementation constraint to tighten decision relevance.');
   }
 
   return { score, warnings, suggestions };
 }
-
