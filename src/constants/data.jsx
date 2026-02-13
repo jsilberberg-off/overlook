@@ -20,11 +20,6 @@ const defaultFutureDateIso = defaultFutureDate.toISOString().slice(0, 10);
 
 export const ARCHETYPES = [
   {
-    id: 'portfolio',
-    label: 'Portfolio strategy',
-    description: 'Define the outcome the portfolio must deliver and the system-level mechanism that makes it inevitable.'
-  },
-  {
     id: 'grant',
     label: 'Grant investment',
     description: 'Anchor on one investment and the outcome it creates, then show how it scales beyond a single grantee.'
@@ -58,5 +53,5 @@ export const INITIAL_DATA = {
   // Final confidence check (0–100)
   confidence: 70,
 
-  archetype: "portfolio"
+  archetype: "grant"
 };

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Telescope, ShieldCheck, FileText, CalendarClock } from 'lucide-react';
-import { ARCHETYPES, JARGON_LIST } from '../../constants/data';
+import { JARGON_LIST } from '../../constants/data';
 import { generateHeadlineCandidates, generateSubheadlineCandidates } from '../../utils/pressReleaseDrafts';
 import { headlineLint } from '../../utils/headlineLint';
 
@@ -16,7 +16,7 @@ const JargonWarning = ({ text, year }) => {
   if (foundJargon.length === 0) return null;
   return (
     <div className="text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg mt-2 flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
-      <span className="font-bold">⚠️ {year || 'Future'} Language Check:</span> 
+      <span className="font-bold">Language check ({year || 'Future'}):</span> 
       Avoid corporate speak like "{foundJargon.join(', ')}". Be human.
     </div>
   );
@@ -24,17 +24,15 @@ const JargonWarning = ({ text, year }) => {
 
 export default function StepRenderer({ stepId, data, onChange, onPreview, missingFields = [], showValidation = false }) {
   const futureYear = useMemo(() => yearFromDate(data?.futureDate), [data?.futureDate]);
-  const inputClass = "w-full p-6 glass-panel rounded-3xl outline-none focus:ring-2 focus:ring-teal-500 text-lg transition-all";
+  const inputClass = "w-full p-5 glass-panel rounded-2xl outline-none focus:ring-2 focus:ring-teal-500 text-base text-slate-700 placeholder:text-slate-400 transition-all";
   const labelClass = "block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2";
   const isMissing = (key) => missingFields.some(field => field.key === key);
   const errorClass = "border border-teal-400/60 ring-1 ring-teal-200/80 focus:ring-teal-400";
   const errorTextClass = "text-xs text-teal-600 mt-2";
   const shouldShowMissing = (key) => showValidation && isMissing(key);
-  const programNameLabel = data?.archetype === 'grant' ? 'Grant / investment name (optional)' : 'Portfolio bet name (optional)';
-  const programNamePlaceholder = data?.archetype === 'grant' ? 'Grant / investment name (optional)' : 'Portfolio bet name (optional)';
-  const scalePlaceholder = data?.archetype === 'grant'
-    ? 'How this scales beyond a single grantee (distribution channel, replication, policy…)'
-    : 'How this scales at system level (policy, procurement, adoption…)';
+  const scalePlaceholder = 'How this scales beyond a single grantee (distribution channel, replication, policy...)';
+  const quoteTextareaClass = "w-full p-4 h-40 glass-panel rounded-2xl outline-none text-base leading-relaxed italic text-slate-700 placeholder:text-slate-400";
+  const noteBoxClass = "text-sm leading-relaxed text-slate-600 bg-white/70 border border-white/60 rounded-2xl p-4";
 
   const headlineLintResult = useMemo(() => headlineLint({
     headline: data?.headline,
@@ -47,73 +45,50 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
 
   switch (stepId) {
     case 'frame': return (
-      <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+      <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
         <div className="text-center py-6">
           <div className="w-16 h-16 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
             <Telescope className="w-8 h-8"/>
           </div>
           <h3 className="text-2xl font-bold text-slate-800">Setup</h3>
-          <p className="text-slate-500 mt-2">Select the archetype and commit to outcome-first writing.</p>
+          <p className="text-slate-600 mt-2">This lab is built for grant investments. Write from a future success state, then pressure-test what would need to be true.</p>
         </div>
 
-        <div className="glass-panel rounded-3xl p-6 space-y-5">
-          <div>
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Archetype</div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-              {ARCHETYPES.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => onChange('archetype', item.id)}
-                  className={`text-left p-4 rounded-2xl border transition-all ${
-                    data?.archetype === item.id
-                      ? 'bg-teal-50 border-teal-200 text-teal-900'
-                      : 'bg-white/60 border-white/60 hover:bg-white hover:border-teal-200 text-slate-700'
-                  }`}
-                >
-                  <div className="font-bold text-sm">{item.label}</div>
-                  <div className="text-xs text-slate-500 mt-1">{item.description}</div>
-                </button>
-              ))}
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="glass-panel rounded-2xl p-5">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Why this works</div>
+            <p className="text-sm text-slate-700 mt-2">It forces a shift from activity plans to outcome claims that can be tested.</p>
           </div>
-
-          <div className="bg-white/70 rounded-2xl border border-white/60 p-4">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">How to use in 5 minutes</div>
-            <ul className="mt-3 space-y-2 text-sm text-slate-700">
-              <li>1) Set horizon.</li>
-              <li>2) Draft headline + metric + population.</li>
-              <li>3) Preview the artifact.</li>
-              <li className="text-slate-500">Optional: backfill proof, mechanism, and voices.</li>
-            </ul>
+          <div className="glass-panel rounded-2xl p-5">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">What to produce</div>
+            <p className="text-sm text-slate-700 mt-2">A headline-level promise, mechanism + proof, and decision notes leadership can act on.</p>
+          </div>
+          <div className="glass-panel rounded-2xl p-5">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">How to use it</div>
+            <p className="text-sm text-slate-700 mt-2">Draft quickly, then switch to Polish mode and resolve every credibility flag.</p>
           </div>
         </div>
 
+        <div className="glass-panel rounded-3xl p-6">
+          <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Recommended flow</div>
+          <ul className="mt-3 space-y-2 text-sm text-slate-700">
+            <li>1) Define the grantee and focus before writing the contrast.</li>
+            <li>2) Write current reality with denominator clarity.</li>
+            <li>3) Pair mechanism and proof in one pass.</li>
+            <li>4) Finish with voices, headline quality checks, and decision notes.</li>
+          </ul>
+        </div>
       </div>
     );
-
     case 'context': return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
            <div className="text-center py-6">
              <div className="w-16 h-16 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner"><CalendarClock className="w-8 h-8"/></div>
              <h3 className="text-2xl font-bold text-slate-800">Horizon</h3>
-             <p className="text-slate-500 mt-2">Anchor the future moment the board will measure against.</p>
+             <p className="text-slate-600 mt-2">Define who this grant is for, then anchor when and where success is true.</p>
            </div>
-           <div className="text-xs text-slate-400 bg-white/60 border border-white/60 rounded-2xl p-4">
-             Before writing the old reality, define who the grantee is and what they are trying to change.
-           </div>
-           <div>
-             <label className={labelClass}>Target Success Date</label>
-             <input type="date" value={data.futureDate} onChange={e => onChange('futureDate', e.target.value)} className={`${inputClass} text-center text-3xl font-serif font-bold ${shouldShowMissing('futureDate') ? errorClass : ''}`} />
-             {shouldShowMissing('futureDate') && (
-               <p className={errorTextClass}>Please choose a target date.</p>
-             )}
-           </div>
-           <div>
-             <label className={labelClass}>Location</label>
-             <input value={data.location} onChange={e => onChange('location', e.target.value)} className={`w-full p-4 glass-panel rounded-xl outline-none text-center font-bold tracking-widest ${shouldShowMissing('location') ? errorClass : ''}`} />
-             {shouldShowMissing('location') && (
-               <p className={errorTextClass}>Add the location of success.</p>
-             )}
+           <div className={noteBoxClass}>
+             Capture grantee identity first so every downstream claim is tied to a concrete actor and focus area.
            </div>
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              <div>
@@ -122,7 +97,7 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
                  value={data.granteeOrg}
                  onChange={e => onChange('granteeOrg', e.target.value)}
                  placeholder="e.g., Brightline Learning Collaborative"
-                 className={`w-full p-4 glass-panel rounded-xl outline-none ${shouldShowMissing('granteeOrg') ? errorClass : ''}`}
+                 className={`${inputClass} ${shouldShowMissing('granteeOrg') ? errorClass : ''}`}
                />
                {shouldShowMissing('granteeOrg') && (
                  <p className={errorTextClass}>Name the grantee organization.</p>
@@ -134,16 +109,31 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
                  value={data.granteeFocus}
                  onChange={e => onChange('granteeFocus', e.target.value)}
                  placeholder="e.g., improving early literacy in rural districts"
-                 className={`w-full p-4 glass-panel rounded-xl outline-none ${shouldShowMissing('granteeFocus') ? errorClass : ''}`}
+                 className={`${inputClass} ${shouldShowMissing('granteeFocus') ? errorClass : ''}`}
                />
                {shouldShowMissing('granteeFocus') && (
                  <p className={errorTextClass}>Describe the core focus area.</p>
                )}
              </div>
            </div>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div>
+               <label className={labelClass}>Target Success Date</label>
+               <input type="date" value={data.futureDate} onChange={e => onChange('futureDate', e.target.value)} className={`${inputClass} font-semibold ${shouldShowMissing('futureDate') ? errorClass : ''}`} />
+               {shouldShowMissing('futureDate') && (
+                 <p className={errorTextClass}>Please choose a target date.</p>
+               )}
+             </div>
+             <div>
+               <label className={labelClass}>Location</label>
+               <input value={data.location} onChange={e => onChange('location', e.target.value)} className={`${inputClass} font-semibold tracking-wide ${shouldShowMissing('location') ? errorClass : ''}`} />
+               {shouldShowMissing('location') && (
+                 <p className={errorTextClass}>Add the location of success.</p>
+               )}
+             </div>
+           </div>
         </div>
     );
-
     case 'problem': return (
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
           {(data.granteeOrg || data.granteeFocus) && (
@@ -180,14 +170,14 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
     );
 
     case 'solution': return (
-        <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
-          <div className="text-xs text-slate-400 bg-white/60 border border-white/60 rounded-2xl p-4">
-            <b className="text-slate-600">Guardrail:</b> This is <b>not</b> a list of activities. It's the <b>single mechanism</b> that made scale unavoidable.
+        <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
+          <div className={noteBoxClass}>
+            <b className="text-slate-700">Guardrail:</b> This is <b>not</b> a list of activities. It's the <b>single mechanism</b> that made scale unavoidable.
           </div>
 
           <div>
              <label className={labelClass}>The Mechanism of Change</label>
-             <textarea value={data.solution} onChange={e => onChange('solution', e.target.value)} placeholder="The specific intervention that broke the pattern..." className={`${inputClass} h-40 ${shouldShowMissing('solution') ? errorClass : ''}`} />
+             <textarea value={data.solution} onChange={e => onChange('solution', e.target.value)} placeholder="The specific intervention that broke the pattern..." className={`${inputClass} h-44 leading-relaxed ${shouldShowMissing('solution') ? errorClass : ''}`} />
              {shouldShowMissing('solution') && (
                <p className={errorTextClass}>Describe the mechanism that changed outcomes.</p>
              )}
@@ -195,20 +185,20 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
           </div>
 
           <div>
-            <label className={labelClass}>Mechanism of scale</label>
-            <input placeholder={scalePlaceholder} value={data.scaleMechanism} onChange={e => onChange('scaleMechanism', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('scaleMechanism') ? errorClass : ''}`} />
+            <label className={labelClass}>Mechanism of Scale</label>
+            <input placeholder={scalePlaceholder} value={data.scaleMechanism} onChange={e => onChange('scaleMechanism', e.target.value)} className={`${inputClass} ${shouldShowMissing('scaleMechanism') ? errorClass : ''}`} />
             {shouldShowMissing('scaleMechanism') && (
               <p className={errorTextClass}>Explain how it scaled.</p>
             )}
           </div>
 
-          <div className="text-xs text-slate-400 bg-white/60 border border-white/60 rounded-2xl p-4">
-             <b className="text-slate-600">Sinatra Test:</b> If this one result disappeared, no serious observer would believe the solution worked nationally.
+          <div className={noteBoxClass}>
+             <b className="text-slate-700">Sinatra Test:</b> If this one result disappeared, no serious observer would believe the solution worked nationally.
           </div>
 
           <div>
              <label className={labelClass}>The Undeniable Proof</label>
-             <textarea value={data.evidence} onChange={e => onChange('evidence', e.target.value)} placeholder="What data point proved the skeptics wrong?" className={`${inputClass} h-40 ${shouldShowMissing('evidence') ? errorClass : ''}`} />
+             <textarea value={data.evidence} onChange={e => onChange('evidence', e.target.value)} placeholder="What data point proved the skeptics wrong?" className={`${inputClass} h-40 leading-relaxed ${shouldShowMissing('evidence') ? errorClass : ''}`} />
              {shouldShowMissing('evidence') && (
                <p className={errorTextClass}>Add the proof point.</p>
              )}
@@ -216,12 +206,12 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              <div>
-               <label className={labelClass}>Who would dispute this?</label>
-               <input placeholder="Skeptic (e.g. State superintendent; union; researchers)" value={data.sinatraSkeptic} onChange={e => onChange('sinatraSkeptic', e.target.value)} className="w-full p-4 glass-panel rounded-2xl outline-none" />
+               <label className={labelClass}>Who Would Dispute This?</label>
+               <input placeholder="Skeptic (e.g. State superintendent; union; researchers)" value={data.sinatraSkeptic} onChange={e => onChange('sinatraSkeptic', e.target.value)} className={inputClass} />
              </div>
              <div>
-               <label className={labelClass}>Why can't they?</label>
-               <input placeholder="What makes it portable / undeniable?" value={data.sinatraWhyUndeniable} onChange={e => onChange('sinatraWhyUndeniable', e.target.value)} className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('sinatraWhyUndeniable') ? errorClass : ''}`} />
+               <label className={labelClass}>Why Can't They?</label>
+               <input placeholder="What makes it portable / undeniable?" value={data.sinatraWhyUndeniable} onChange={e => onChange('sinatraWhyUndeniable', e.target.value)} className={`${inputClass} ${shouldShowMissing('sinatraWhyUndeniable') ? errorClass : ''}`} />
                {shouldShowMissing('sinatraWhyUndeniable') && (
                  <p className={errorTextClass}>Clarify why it can't be disputed.</p>
                )}
@@ -231,31 +221,30 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
     );
     case 'stakeholder': return (
         <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
-          <div className="text-xs text-slate-400 bg-white/60 border border-white/60 rounded-2xl p-4">
-            These two quotes should <b className="text-slate-600">contrast in tone</b> but not truth: <b className="text-slate-600">Internal</b> = systemic / inevitable; <b className="text-slate-600">External</b> = lived / specific.
+          <div className={noteBoxClass}>
+            These two quotes should <b className="text-slate-700">contrast in tone</b> but not truth: <b className="text-slate-700">Internal</b> = systemic / inevitable; <b className="text-slate-700">External</b> = lived / specific.
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
               <label className={labelClass}>Internal Reflection</label>
-              <textarea placeholder="Looking back, we realized..." value={data.internalQuote} onChange={e => onChange('internalQuote', e.target.value)} className={`w-full p-4 h-40 glass-panel rounded-2xl outline-none text-sm italic ${shouldShowMissing('internalQuote') ? errorClass : ''}`} />
+              <textarea placeholder="Looking back, we realized..." value={data.internalQuote} onChange={e => onChange('internalQuote', e.target.value)} className={`${quoteTextareaClass} ${shouldShowMissing('internalQuote') ? errorClass : ''}`} />
               {shouldShowMissing('internalQuote') && (
                 <p className={errorTextClass}>Add the internal reflection.</p>
               )}
-              <input placeholder="Speaker Name/Title" value={data.internalSpeaker} onChange={e => onChange('internalSpeaker', e.target.value)} className="w-full p-3 glass-panel rounded-xl text-xs" />
+              <input placeholder="Speaker Name/Title" value={data.internalSpeaker} onChange={e => onChange('internalSpeaker', e.target.value)} className="w-full p-3 glass-panel rounded-xl text-sm text-slate-700 placeholder:text-slate-400" />
             </div>
             <div className="space-y-3">
               <label className={labelClass}>Beneficiary Voice</label>
-              <textarea placeholder="Before this program, I used to..." value={data.externalQuote} onChange={e => onChange('externalQuote', e.target.value)} className={`w-full p-4 h-40 glass-panel rounded-2xl outline-none text-sm italic border-l-4 border-teal-500 ${shouldShowMissing('externalQuote') ? errorClass : ''}`} />
+              <textarea placeholder="Before this program, I used to..." value={data.externalQuote} onChange={e => onChange('externalQuote', e.target.value)} className={`${quoteTextareaClass} ${shouldShowMissing('externalQuote') ? errorClass : ''}`} />
               {shouldShowMissing('externalQuote') && (
                 <p className={errorTextClass}>Add the beneficiary quote.</p>
               )}
-              <input placeholder="Speaker Name/Title" value={data.externalSpeaker} onChange={e => onChange('externalSpeaker', e.target.value)} className="w-full p-3 glass-panel rounded-xl text-xs" />
+              <input placeholder="Speaker Name/Title" value={data.externalSpeaker} onChange={e => onChange('externalSpeaker', e.target.value)} className="w-full p-3 glass-panel rounded-xl text-sm text-slate-700 placeholder:text-slate-400" />
             </div>
           </div>
         </div>
     );
-
     case 'headline': return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
           <div className="glass-panel rounded-3xl p-6 space-y-4">
@@ -301,9 +290,9 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
                 )}
               </div>
               <div>
-                <label className={labelClass}>{programNameLabel}</label>
+                <label className={labelClass}>Grant / investment name (optional)</label>
                 <input
-                  placeholder={programNamePlaceholder}
+                  placeholder="Grant / investment name (optional)"
                   value={data.programName}
                   onChange={e => onChange('programName', e.target.value)}
                   className="w-full p-4 glass-panel rounded-2xl outline-none font-bold"
