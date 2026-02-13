@@ -33,6 +33,7 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
   const scalePlaceholder = 'How this scales beyond a single grantee (distribution channel, replication, policy...)';
   const quoteTextareaClass = "w-full p-4 h-40 glass-panel rounded-2xl outline-none text-base leading-relaxed italic text-slate-700 placeholder:text-slate-400";
   const noteBoxClass = "text-sm leading-relaxed text-slate-600 bg-white/70 border border-white/60 rounded-2xl p-4";
+  const sectionKickerClass = "text-[11px] font-bold text-slate-400 uppercase tracking-widest";
 
   const headlineLintResult = useMemo(() => headlineLint({
     headline: data?.headline,
@@ -246,20 +247,20 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
         </div>
     );
     case 'headline': return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-          <div className="glass-panel rounded-3xl p-6 space-y-4">
+        <div className="space-y-7 animate-in fade-in slide-in-from-right-4 duration-500">
+          <div className="glass-panel rounded-3xl p-6 space-y-5">
             <div>
-              <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Headline inputs</div>
-              <div className="text-xs text-slate-500 mt-1">These fields drive your headline and reduce redundancy later.</div>
+              <div className={sectionKickerClass}>Headline Inputs</div>
+              <div className="text-sm text-slate-600 mt-1">These fields drive your headline and reduce redundancy later.</div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>Success metric</label>
+                <label className={labelClass}>Success Metric</label>
                 <input
                   placeholder="e.g., 95% retention"
                   value={data.successMetric}
                   onChange={e => onChange('successMetric', e.target.value)}
-                  className={`w-full p-4 glass-panel rounded-2xl outline-none text-teal-700 font-bold ${shouldShowMissing('successMetric') ? errorClass : ''}`}
+                  className={`${inputClass} text-teal-700 font-semibold ${shouldShowMissing('successMetric') ? errorClass : ''}`}
                 />
                 {shouldShowMissing('successMetric') && (
                   <p className={errorTextClass}>Include the key metric.</p>
@@ -271,19 +272,19 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
                   placeholder="Who benefits? (e.g., rural students)"
                   value={data.beneficiary}
                   onChange={e => onChange('beneficiary', e.target.value)}
-                  className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('beneficiary') ? errorClass : ''}`}
+                  className={`${inputClass} ${shouldShowMissing('beneficiary') ? errorClass : ''}`}
                 />
                 {shouldShowMissing('beneficiary') && (
                   <p className={errorTextClass}>Name who benefits.</p>
                 )}
               </div>
               <div>
-                <label className={labelClass}>Problem scope (optional)</label>
+                <label className={labelClass}>Problem Scope (optional)</label>
                 <input
                   placeholder="Scale or count (e.g., 2 million)"
                   value={data.problemScope}
                   onChange={e => onChange('problemScope', e.target.value)}
-                  className={`w-full p-4 glass-panel rounded-2xl outline-none ${shouldShowMissing('problemScope') ? errorClass : ''}`}
+                  className={`${inputClass} ${shouldShowMissing('problemScope') ? errorClass : ''}`}
                 />
                 {shouldShowMissing('problemScope') && (
                   <p className={errorTextClass}>Add the scale or count.</p>
@@ -295,49 +296,49 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
                   placeholder="Grant / investment name (optional)"
                   value={data.programName}
                   onChange={e => onChange('programName', e.target.value)}
-                  className="w-full p-4 glass-panel rounded-2xl outline-none font-bold"
+                  className={`${inputClass} font-semibold`}
                 />
               </div>
             </div>
           </div>
 
-          <div className="text-xs text-slate-400 bg-white/60 border border-white/60 rounded-2xl p-4">
-            Formula: <b className="text-slate-600">Outcome</b> + <b className="text-slate-600">Metric</b> + <b className="text-slate-600">Population</b> + <b className="text-slate-600">Date</b>. Keep it board-ready.
+          <div className={noteBoxClass}>
+            Formula: <b className="text-slate-700">Outcome</b> + <b className="text-slate-700">Metric</b> + <b className="text-slate-700">Population</b> + <b className="text-slate-700">Date</b>. Keep it board-ready.
           </div>
 
-          <div className="glass-panel rounded-3xl p-6 space-y-4">
+          <div className="glass-panel rounded-3xl p-6 space-y-5">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Headline quality checks</div>
-                <div className="text-xs text-slate-500 mt-1">Avoid process language and surface the outcome.</div>
+                <div className={sectionKickerClass}>Headline Quality Checks</div>
+                <div className="text-sm text-slate-600 mt-1">Avoid process language and surface the outcome.</div>
               </div>
             </div>
             {headlineLintResult.flags.length > 0 ? (
               <div className="space-y-3">
                 {headlineLintResult.flags.slice(0, 3).map((flag) => (
-                  <div key={flag.id} className="p-3 rounded-2xl bg-amber-50/70 border border-amber-100 text-sm">
+                  <div key={flag.id} className="p-4 rounded-2xl bg-amber-50/70 border border-amber-100 text-sm">
                     <div className="font-bold text-amber-900">{flag.title}</div>
-                    {flag.detail && <div className="text-xs text-amber-800 mt-1">{flag.detail}</div>}
+                    {flag.detail && <div className="text-sm text-amber-900/90 mt-1">{flag.detail}</div>}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-xs text-emerald-700 bg-emerald-50/70 border border-emerald-100 px-3 py-2 rounded-2xl">
+              <div className="text-sm text-emerald-700 bg-emerald-50/70 border border-emerald-100 px-4 py-3 rounded-2xl">
                 No obvious headline issues detected.
               </div>
             )}
             {headlineLintResult.rewrites.length > 0 && (
               <div>
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Quick rewrites</div>
+                <div className={`${sectionKickerClass} mb-2`}>Quick Rewrites</div>
                 <div className="space-y-2">
                   {headlineLintResult.rewrites.slice(0, 3).map((rewrite, idx) => (
                     <button
                       key={`${rewrite.label}-${idx}`}
                       onClick={() => onChange('headline', rewrite.headline)}
-                      className="w-full text-left px-4 py-3 rounded-2xl border bg-white/60 border-white/60 hover:bg-white hover:border-teal-200 text-slate-700"
+                      className="w-full text-left px-5 py-4 rounded-2xl border bg-white/60 border-white/60 hover:bg-white hover:border-teal-200 text-slate-700"
                     >
-                      <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">{rewrite.label}</div>
-                      <div className="font-bold text-sm leading-snug mt-1">{rewrite.headline}</div>
+                      <div className={sectionKickerClass}>{rewrite.label}</div>
+                      <div className="font-semibold text-base leading-snug mt-1">{rewrite.headline}</div>
                     </button>
                   ))}
                 </div>
@@ -349,8 +350,8 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
           <div className="glass-panel rounded-3xl p-6">
             <div className="flex items-center justify-between gap-4 mb-4">
               <div>
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Auto-drafts from your inputs</div>
-                <div className="text-xs text-slate-500 mt-1">Click a suggestion to use it (no new claims).</div>
+                <div className={sectionKickerClass}>Auto-Drafts From Your Inputs</div>
+                <div className="text-sm text-slate-600 mt-1">Click a suggestion to use it (no new claims).</div>
               </div>
             </div>
 
@@ -359,31 +360,31 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
                 <button
                   key={`h-${idx}`}
                   onClick={() => onChange('headline', h)}
-                  className={`w-full text-left px-4 py-3 rounded-2xl border transition-all ${
+                  className={`w-full text-left px-5 py-4 rounded-2xl border transition-all ${
                     (data.headline || '').trim() === h
                       ? 'bg-teal-50 border-teal-200 text-teal-900'
                       : 'bg-white/60 border-white/60 hover:bg-white hover:border-teal-200 text-slate-700'
                   }`}
                 >
-                  <div className="font-bold text-sm leading-snug">{h}</div>
+                  <div className="font-semibold text-base leading-snug">{h}</div>
                 </button>
               ))}
             </div>
 
             <div className="mt-5">
-              <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Subheadline options</div>
+              <div className={`${sectionKickerClass} mb-2`}>Subheadline Options</div>
               <div className="space-y-2">
                 {generateSubheadlineCandidates(data).slice(0, 3).map((s, idx) => (
                   <button
                     key={`s-${idx}`}
                     onClick={() => onChange('subheadline', s)}
-                    className={`w-full text-left px-4 py-3 rounded-2xl border transition-all ${
+                    className={`w-full text-left px-5 py-4 rounded-2xl border transition-all ${
                       (data.subheadline || '').trim() === s
                         ? 'bg-teal-50 border-teal-200 text-teal-900'
                         : 'bg-white/60 border-white/60 hover:bg-white hover:border-teal-200 text-slate-700'
                     }`}
                   >
-                    <div className="text-sm italic leading-snug">{s}</div>
+                    <div className="text-base italic leading-snug">{s}</div>
                   </button>
                 ))}
               </div>
@@ -392,12 +393,12 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
 
           <div>
             <label className={labelClass}>The Press Release Headline</label>
-            <textarea value={data.headline} onChange={e => onChange('headline', e.target.value)} placeholder="Catalyst + Verb + Metric + Population" className={`w-full p-8 text-3xl font-serif font-bold glass-panel rounded-[2.5rem] outline-none focus:ring-2 focus:ring-teal-500 leading-tight ${shouldShowMissing('headline') ? errorClass : ''}`} />
+            <textarea value={data.headline} onChange={e => onChange('headline', e.target.value)} placeholder="Catalyst + Verb + Metric + Population" className={`w-full p-6 md:p-7 text-2xl md:text-3xl font-serif font-bold glass-panel rounded-3xl outline-none focus:ring-2 focus:ring-teal-500 leading-tight tracking-tight ${shouldShowMissing('headline') ? errorClass : ''}`} />
             {shouldShowMissing('headline') && (
               <p className={errorTextClass}>Write the headline before moving on.</p>
             )}
           </div>
-          <input placeholder="Subheadline context..." value={data.subheadline} onChange={e => onChange('subheadline', e.target.value)} className="w-full p-4 glass-panel rounded-2xl outline-none italic text-slate-500" />
+          <input placeholder="Subheadline context..." value={data.subheadline} onChange={e => onChange('subheadline', e.target.value)} className={`${inputClass} italic`} />
 
           <div className="text-center">
             <button onClick={onPreview} className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold shadow-xl hover:scale-105 transition-all flex items-center gap-3 mx-auto ring-4 ring-slate-100">
@@ -408,14 +409,14 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
     );
 
     case 'review': return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+        <div className="space-y-7 animate-in fade-in slide-in-from-right-4 duration-500">
           <div className="text-center pt-8">
             <div className="inline-block p-6 bg-green-50 rounded-full mb-6 border border-green-100 shadow-xl"><ShieldCheck className="w-12 h-12 text-green-600" /></div>
             <h3 className="text-3xl font-bold mb-2 text-slate-900">Finalize</h3>
-            <p className="text-slate-500 mb-2 max-w-md mx-auto">Finalize the artifact, then capture decision notes for board prep.</p>
+            <p className="text-slate-600 mb-2 max-w-md mx-auto">Finalize the artifact, then capture decision notes for board prep.</p>
           </div>
 
-          <div className="glass-panel rounded-3xl p-6">
+          <div className="glass-panel rounded-3xl p-6 space-y-3">
             <label className={labelClass}>Confidence Check</label>
             <div className="flex items-center gap-4">
               <input
@@ -428,58 +429,58 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
               />
               <div className="w-16 text-right font-bold text-slate-700">{typeof data.confidence === 'number' ? data.confidence : 70}/100</div>
             </div>
-            <p className="text-xs text-slate-400 mt-2">
+            <p className="text-sm text-slate-600 mt-1">
               Low confidence usually means the denominator is fuzzy, the scale mechanism is unclear, or the Sinatra proof is weak.
             </p>
           </div>
 
-          <div className="glass-panel rounded-3xl p-6 space-y-4">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Internal decision notes</div>
-            <div className="text-xs text-slate-500">
+          <div className="glass-panel rounded-3xl p-6 space-y-5">
+            <div className={sectionKickerClass}>Internal Decision Notes</div>
+            <div className="text-sm text-slate-600">
               Optional, but useful for turning this press-release draft into a funding or strategy tool.
             </div>
 
             <div>
-              <label className={labelClass}>Decision this should inform</label>
+              <label className={labelClass}>Decision This Should Inform</label>
               <textarea
                 value={data.decisionToInform}
                 onChange={e => onChange('decisionToInform', e.target.value)}
                 placeholder="e.g., Fund a 12-month build phase; pause if implementation burden is too high; seek a district distribution partner"
-                className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
+                className={`${inputClass} min-h-[112px] leading-relaxed`}
                 rows={3}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>Top risks / failure modes</label>
+                <label className={labelClass}>Top Risks / Failure Modes</label>
                 <textarea
                   value={data.keyRisks}
                   onChange={e => onChange('keyRisks', e.target.value)}
                   placeholder="3 bullets is enough. What would make the headline untrue?"
-                  className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
+                  className={`${inputClass} min-h-[140px] leading-relaxed`}
                   rows={4}
                 />
               </div>
               <div>
-                <label className={labelClass}>Kill criteria</label>
+                <label className={labelClass}>Kill Criteria</label>
                 <textarea
                   value={data.killCriteria}
                   onChange={e => onChange('killCriteria', e.target.value)}
-                  placeholder="If by [date] we don't see [leading indicator], we stop/pivot…"
-                  className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
+                  placeholder="If by [date] we don't see [leading indicator], we stop/pivot..."
+                  className={`${inputClass} min-h-[140px] leading-relaxed`}
                   rows={4}
                 />
               </div>
             </div>
 
             <div>
-              <label className={labelClass}>Next experiment (90 days)</label>
+              <label className={labelClass}>Next Experiment (90 days)</label>
               <textarea
                 value={data.nextExperiment}
                 onChange={e => onChange('nextExperiment', e.target.value)}
                 placeholder="Smallest credible test that would update belief (what, where, who, how measured)."
-                className="w-full p-4 glass-panel rounded-2xl outline-none text-sm"
+                className={`${inputClass} min-h-[112px] leading-relaxed`}
                 rows={3}
               />
             </div>
@@ -493,7 +494,6 @@ export default function StepRenderer({ stepId, data, onChange, onPreview, missin
           </div>
         </div>
     );
-
     default: return null;
   }
 }
